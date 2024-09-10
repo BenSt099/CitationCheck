@@ -1,5 +1,6 @@
 import os
 import requests
+import webbrowser
 import customtkinter
 from tkinter import filedialog
 from PIL import Image
@@ -11,6 +12,48 @@ def contact_crossref_api(email_address, data_dict):
         response = requests.get(api_url)
         return response.json()
 
+class LowerFrame(customtkinter.CTkFrame):
+    def __init__(self, master, **kwargs):
+        super().__init__(master, **kwargs)
+
+        self.configure(fg_color="gray17")
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
+        innerFrame = customtkinter.CTkFrame(master=self, height=20)
+        innerFrame.grid(row=0, column=0, padx=160, pady=10, sticky="ew")
+        innerFrame.grid_rowconfigure(0, weight=1)
+        innerFrame.grid_rowconfigure(1, weight=1)
+        innerFrame.grid_columnconfigure(0, weight=1)
+
+        upperFrame = customtkinter.CTkFrame(master=innerFrame)
+        lowerFrame = customtkinter.CTkFrame(master=innerFrame)
+        upperFrame.grid(row=0, column=0, sticky="ew")
+        lowerFrame.grid(row=1, column=0, sticky="ew")
+
+        upperFrame.grid_rowconfigure(0, weight=1)
+        upperFrame.grid_columnconfigure(0, weight=1)
+        lowerFrame.grid_rowconfigure(0, weight=1)
+        lowerFrame.grid_columnconfigure(0, weight=1)
+        lowerFrame.grid_columnconfigure(1, weight=1)
+
+        label = customtkinter.CTkLabel(upperFrame, text="CitationCheck v1.0", height=10, font=customtkinter.CTkFont(family='times new roman 16 bold', size=20, weight="bold"))
+        label.grid(row=0, column=0, padx=0, pady=0, sticky="ew")
+
+        image_github = customtkinter.CTkImage(Image.open("logo_github.png"), size=(18,18))
+        label_github = customtkinter.CTkButton(lowerFrame, fg_color = "transparent", height=10, hover_color="#181818", text="Homepage", image=image_github, compound="left", font=customtkinter.CTkFont(family='times new roman 14 bold', size=17, weight="bold"), command=self.openGitHub)
+        label_github.grid(row=0, column=0, padx=0, pady=0, sticky="ew")
+
+        image_issue = customtkinter.CTkImage(Image.open("issue.png"), size=(18,18))
+        label_issue = customtkinter.CTkButton(lowerFrame, fg_color = "transparent", height=10, hover_color="#181818", text="Issues", image=image_issue, compound="left", font=customtkinter.CTkFont(family='times new roman 14 bold', size=17, weight="bold"), command=self.openGitHubIssue)
+        label_issue.grid(row=0, column=1, padx=0, pady=0, sticky="ew")
+
+    def openGitHub(self):
+        webbrowser.open_new(r"https://github.com/BenSt099/CitationCheck")
+
+    def openGitHubIssue(self):
+        webbrowser.open_new(r"https://github.com/BenSt099/CitationCheck/issues")
+
 class UpperFrame(customtkinter.CTkFrame):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
@@ -18,14 +61,14 @@ class UpperFrame(customtkinter.CTkFrame):
         self.configure(fg_color="black")
 
         self.button1 = customtkinter.CTkButton(self, text="BIB", fg_color="#bf0041", hover_color="#8d0433", text_color='#000000', font=customtkinter.CTkFont(family='times new roman 16 bold', size=20, weight="bold"), command=self.process_bibtex_file)
-        self.button1.grid(row=1, column=1, padx=20, pady=20, sticky="ew", columnspan=1)
+        self.button1.grid(row=1, column=1, padx=20, pady=20, sticky="ew")
         self.button2 = customtkinter.CTkButton(self, text="SINGLE", fg_color="#bf0041", hover_color="#8d0433", text_color='#000000', font=customtkinter.CTkFont(family='times new roman 16 bold', size=20, weight="bold"), command=self.openWindow)
-        self.button2.grid(row=1, column=2, padx=20, pady=20, sticky="ew", columnspan=2)
+        self.button2.grid(row=1, column=2, padx=20, pady=20, sticky="ew")
 
         self.toplevel_window = None
 
     def openFileDialog(event=None):
-        filepath = filedialog.askopenfilename()
+        filepath = filedialog.askopenfilename(filetypes=[("BibTex Files", "*.bib")])
         return filepath
         
     def process_bibtex_file(self):
@@ -92,6 +135,7 @@ class SingleCTk(customtkinter.CTkToplevel):
         ###############################################################################
 
     def close(self):
+        self.closed = True
         self.withdraw()
 
     def destroy_all(self):
@@ -111,19 +155,23 @@ class SingleCTk(customtkinter.CTkToplevel):
 class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
-
         customtkinter.set_appearance_mode("System")
         customtkinter.set_default_color_theme("dark-blue")
-
         self.geometry("800x600")
         self.title("CheckCitation")
         self.iconbitmap('logo.ico')
 
-        self.grid_rowconfigure(2)
-        self.grid_columnconfigure(0)
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(2, weight=1)
+        self.grid_rowconfigure(3, weight=1)
+        self.grid_rowconfigure(4, weight=0)
+        self.grid_columnconfigure(0, weight=1)
 
         self.upperframe = UpperFrame(master=self)
-        self.upperframe.grid(row=0, column=0, padx=0, pady=0, sticky="ew")
+        self.upperframe.grid(row=0, column=0, padx=0, pady=0, rowspan=4, sticky="news")
+        self.lowerframe = LowerFrame(master=self, height=10)
+        self.lowerframe.grid(row=4, column=0, padx=0, pady=0, sticky="new")
         
 if __name__ == "__main__":
     app = App()
