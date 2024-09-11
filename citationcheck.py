@@ -5,13 +5,21 @@ import webbrowser
 import customtkinter
 from tkinter import filedialog
 from PIL import Image
+from pdf import create_pdf_and_save
+from bibtex import process_bibtex_file
 
-def contact_crossref_api(email_address, data_dict):
+def contact_crossref_api(email_address, data_list):
+                                        # data_list = ['title','doi']
+        if data_list[1].strip() != '':
+            api_url = "https://api.labs.crossref.org/works/" + data_list[1] + "?mailto=" + email_address
+        else:
+            api_url = "https://api.labs.crossref.org/works?query.bibliographic=" + data_list[0] +  "&mailto=" + email_address
 
-        # api_url = "https://api.labs.crossref.org/works/10.2147/CMAR.S324920?mailto=ginny@crossref.org"
-        api_url = "https://api.labs.crossref.org/works/" + data + "mailto=" + email_address
         response = requests.get(api_url)
         return response.json()
+
+def process_response(response_json):
+    pass
 
 class UpperFrame(customtkinter.CTkFrame):
     def __init__(self, master, **kwargs):
@@ -53,8 +61,8 @@ class UpperFrame(customtkinter.CTkFrame):
         rightinfo.grid(row=0, column=1, padx=0, pady=0, sticky="ew")
 
         image_pdf = customtkinter.CTkImage(Image.open("filetype-pdf.png"), size=(20,20))
-        label_title = customtkinter.CTkButton(infoFrame, fg_color = "#2a51fa", hover_color="#0c38f5", text_color="black", text="PDF", image=image_pdf, compound="right", font=customtkinter.CTkFont(family='times new roman 14 bold', size=17, weight="bold"), command=self.export_to_pdf)
-        label_title.grid(row=2, column=0, padx=10, pady=10)
+        label_pdf = customtkinter.CTkButton(infoFrame, fg_color = "#2a51fa", hover_color="#0c38f5", text_color="black", text="PDF", image=image_pdf, compound="right", font=customtkinter.CTkFont(family='times new roman 14 bold', size=17, weight="bold"), command=self.export_to_pdf)
+        label_pdf.grid(row=2, column=0, padx=10, pady=10)
         ###########################
 
         controlFrame = customtkinter.CTkFrame(master=self)
@@ -70,29 +78,33 @@ class UpperFrame(customtkinter.CTkFrame):
         buttons.grid_columnconfigure(0, weight=1)
         buttons.grid_columnconfigure(1, weight=1)
 
-        button1 = customtkinter.CTkButton(buttons, text="BiB", fg_color="#bf0041", hover_color="#8d0433", text_color='#000000', font=customtkinter.CTkFont(family='times new roman 16 bold', size=20, weight="bold"), command=self.process_bibtex_file)
+        button1 = customtkinter.CTkButton(buttons, text="BiB", fg_color="#bf0041", hover_color="#8d0433", text_color='#000000', font=customtkinter.CTkFont(family='times new roman 16 bold', size=20, weight="bold"), command=self.bibtex)
         button1.grid(row=0, column=0, padx=10, pady=10, sticky="news")
         button2 = customtkinter.CTkButton(buttons, text="SINGLE", fg_color="#bf0041", hover_color="#8d0433", text_color='#000000', font=customtkinter.CTkFont(family='times new roman 16 bold', size=20, weight="bold"), command=self.openWindow)
         button2.grid(row=0, column=1, padx=10, pady=10, sticky="news")
 
-    def export_to_pdf(self):
-        pass
-
+    ### bibtex
     def openFileDialog(event=None):
         filepath = filedialog.askopenfilename(filetypes=[("BibTex Files", "*.bib")])
         return filepath
         
-    def process_bibtex_file(self):
+    def bibtex(self):
         path = self.openFileDialog()
 
         if os.path.exists(path) and path.lower().endswith(".bib"):
-            print("works")
+            dict_information = process_bibtex_file(path)
         else:
             if not bool(path.strip()):
-                print(path)
+                pass
             else:
-                print("doesn't work")
+                pass
+    ### bibtex
     
+    def export_to_pdf(self, data):
+        filename = filedialog.asksaveasfilename(title="Choose location", filetypes=[("PDF Files", "*.pdf")])
+        create_pdf_and_save(filename, data)
+        
+    ### single
     def openWindow(self):
         if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
             self.toplevel_window = SingleCTk(self) 
@@ -103,14 +115,20 @@ class UpperFrame(customtkinter.CTkFrame):
                 self.toplevel_window.update()
 
             k = self.toplevel_window.get_information()  
-            
             self.toplevel_window.destroy_all()
+            content_dict = {}
+            with open('cc_email.json') as email_file:
+                content_dict = json.load(email_file)
+
+            response_info = contact_crossref_api(k, content_dict['email'])
+            result = process_response(response_info)
             
         else:
             self.toplevel_window.focus()
+    ### single
 
 class SingleCTk(customtkinter.CTkToplevel):
-    information = {}
+    information = []
     closed = False
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -153,10 +171,7 @@ class SingleCTk(customtkinter.CTkToplevel):
         self.destroy()
 
     def collect(self):
-        self.information = {
-            "title_info": self.title_input.get(),
-            "doi_info": self.doi_input.get()
-        }
+        self.information = [self.title_input.get(), self.doi_input.get()]
         self.closed = True
         self.withdraw()
 
