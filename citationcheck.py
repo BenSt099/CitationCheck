@@ -1,4 +1,5 @@
 import os
+import json
 import requests
 import webbrowser
 import customtkinter
@@ -99,7 +100,7 @@ class UpperFrame(customtkinter.CTkFrame):
             self.toplevel_window.grab_set()
             
             while self.toplevel_window.closed != True:
-                self.update()
+                self.toplevel_window.update()
 
             k = self.toplevel_window.get_information()  
             
@@ -223,6 +224,19 @@ class App(customtkinter.CTk):
         self.upperframe.grid(row=0, column=0, padx=0, pady=0, rowspan=4, sticky="news")
         self.lowerframe = LowerFrame(master=self, height=10)
         self.lowerframe.grid(row=4, column=0, padx=0, pady=0, sticky="new")
+
+        content_dict = {}
+        with open('cc_email.json') as email_file:
+            content_dict = json.load(email_file)
+
+        if content_dict == {}:
+            dialog = customtkinter.CTkInputDialog(text="Please type in your e-mail address:", title="EMail-Address", button_fg_color="#bf0041", button_hover_color="#8d0433", button_text_color="black", font=customtkinter.CTkFont(family='times new roman 16 bold', size=17, weight="bold"))
+            email = dialog.get_input()
+            content_dict = {
+                'email': email
+            }
+            with open("cc_email.json", mode="w", encoding="utf-8") as email_file:
+                json.dump(content_dict, email_file)
         
 if __name__ == "__main__":
     app = App()

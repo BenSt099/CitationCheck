@@ -16,7 +16,7 @@ The documentation is avaiable [here](https://github.com/BenSt099/CitationCheck/b
 ## Disclaimer
 
 The project's GUI is inspired from the project [FluidFrames.RIFE](https://github.com/Djdefrag/FluidFrames.RIFE). The files `icon_questionmark.png` and
-`logo_github.png` were both taken from **FluidFrames.RIFE**.
+`logo_github.png` were both taken from **FluidFrames.RIFE**. The file `filetype-pdf.svg` was taken from [here](https://icons.getbootstrap.com/icons/filetype-pdf/).
 
 ## License 
 
