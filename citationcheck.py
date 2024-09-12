@@ -1,26 +1,33 @@
 import os
+import csv
 import json
 import requests
 import webbrowser
 import customtkinter
 from tkinter import filedialog
+from tkinter import StringVar
 from PIL import Image
 from pdf import create_pdf_and_save
 from bibtex import process_bibtex_file
+from csvupdate import update_and_save
 
-def contact_crossref_api(email_address, data_list):
-                                        # data_list = ['title','doi']
-        if data_list[1].strip() != '':
-            api_url = "https://api.labs.crossref.org/works/" + data_list[1] + "?mailto=" + email_address
-        else:
-            api_url = "https://api.labs.crossref.org/works?query.bibliographic=" + data_list[0] +  "&mailto=" + email_address
+global_data = {}
 
-        response = requests.get(api_url)
-        return response.json()
+def contact_crossref_api(data_list, email_address):
+                         # data_list = ['title','doi']
+    
+    api_url = "https://api.labs.crossref.org/works/" + data_list[1] + "?mailto=" + email_address
+    response = requests.get(api_url)
+    return response.json()
 
 def process_response(response_json):
-    pass
-
+    print(response_json)
+    try:
+        information = response_json['message']['cr-labs-updates'][0]['reasons']
+    except KeyError:
+        return -1
+    return information
+    
 class UpperFrame(customtkinter.CTkFrame):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
@@ -45,8 +52,8 @@ class UpperFrame(customtkinter.CTkFrame):
 
         ###########################
         image_cc_icon = customtkinter.CTkImage(Image.open("logo.png"), size=(21,21))
-        label_title = customtkinter.CTkButton(infoFrame, fg_color = "gray13", hover_color="gray13", text="CitationCheck", image=image_cc_icon, compound="left", font=customtkinter.CTkFont(family='times new roman 14 bold', size=20, weight="bold"))
-        label_title.grid(row=0, column=0, padx=10, pady=10)
+        self.label_title = customtkinter.CTkButton(infoFrame, fg_color = "gray13", hover_color="gray13", text="CitationCheck", image=image_cc_icon, compound="left", font=customtkinter.CTkFont(family='times new roman 14 bold', size=20, weight="bold"))
+        self.label_title.grid(row=0, column=0, padx=10, pady=10)
 
         middle = customtkinter.CTkFrame(master=infoFrame)
         middle.configure(fg_color="gray13")
@@ -55,14 +62,40 @@ class UpperFrame(customtkinter.CTkFrame):
         middle.grid_columnconfigure(0, weight=1)
         middle.grid_columnconfigure(1, weight=1)
 
-        leftinfo = customtkinter.CTkLabel(middle, text_color="lime green", text="Passed: -", height=10, font=customtkinter.CTkFont(family='times new roman 16 bold', size=20, weight="bold"))
-        leftinfo.grid(row=0, column=0, padx=0, pady=0, sticky="ew")
-        rightinfo = customtkinter.CTkLabel(middle, text_color="firebrick3", text="Failed: -", height=10, font=customtkinter.CTkFont(family='times new roman 16 bold', size=20, weight="bold"))
-        rightinfo.grid(row=0, column=1, padx=0, pady=0, sticky="ew")
+        self.leftinfo = customtkinter.CTkLabel(middle, text_color="lime green", text="Passed: -", height=10, font=customtkinter.CTkFont(family='times new roman 16 bold', size=20, weight="bold"))
+        self.leftinfo.grid(row=0, column=0, padx=0, pady=0, sticky="ew")
+        self.rightinfo = customtkinter.CTkLabel(middle, text_color="firebrick3", text="Failed: -", height=10, font=customtkinter.CTkFont(family='times new roman 16 bold', size=20, weight="bold"))
+        self.rightinfo.grid(row=0, column=1, padx=0, pady=0, sticky="ew")
+
+
+        settingsFrame = customtkinter.CTkFrame(master=infoFrame)
+        settingsFrame.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
+        settingsFrame.configure(fg_color="gray13")
+        settingsFrame.grid_rowconfigure(0, weight=1)
+        settingsFrame.grid_columnconfigure(0, weight=1)
+        settingsFrame.grid_columnconfigure(1, weight=1)
+        settingsFrame.grid_columnconfigure(2, weight=1)
+
+        radioFrame = customtkinter.CTkFrame(master=settingsFrame)
+        radioFrame.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
+        radioFrame.configure(fg_color="gray13")
+        radioFrame.grid_rowconfigure(0, weight=1)
+        radioFrame.grid_rowconfigure(1, weight=1)
+        radioFrame.grid_columnconfigure(0, weight=1)
+
+        radio_var = StringVar(None,"1")
+        self.radio_up = customtkinter.CTkRadioButton(radioFrame, text="Local [CSV]", variable=radio_var, value="1")
+        self.radio_up.grid(row=0, column=0, padx=5, pady=2)
+        self.radio_down = customtkinter.CTkRadioButton(radioFrame, text="Online [API]", variable=radio_var, value="2")
+        self.radio_down.grid(row=1, column=0, padx=5, pady=2)
+
+        image_update = customtkinter.CTkImage(Image.open("update.png"), size=(20,20))
+        label_update = customtkinter.CTkButton(settingsFrame, fg_color = "#8a8888", hover_color="#636262", text_color="black", text="UPDATE", image=image_update, compound="right", font=customtkinter.CTkFont(family='times new roman 14 bold', size=17, weight="bold"), command=self.call_update)
+        label_update.grid(row=0, column=1, padx=10, pady=10)
 
         image_pdf = customtkinter.CTkImage(Image.open("filetype-pdf.png"), size=(20,20))
-        label_pdf = customtkinter.CTkButton(infoFrame, fg_color = "#2a51fa", hover_color="#0c38f5", text_color="black", text="PDF", image=image_pdf, compound="right", font=customtkinter.CTkFont(family='times new roman 14 bold', size=17, weight="bold"), command=self.export_to_pdf)
-        label_pdf.grid(row=2, column=0, padx=10, pady=10)
+        label_pdf = customtkinter.CTkButton(settingsFrame, fg_color = "#2a51fa", hover_color="#0c38f5", text_color="black", text="PDF", image=image_pdf, compound="right", font=customtkinter.CTkFont(family='times new roman 14 bold', size=17, weight="bold"), command=self.export_to_pdf)
+        label_pdf.grid(row=0, column=2, padx=10, pady=10)
         ###########################
 
         controlFrame = customtkinter.CTkFrame(master=self)
@@ -80,8 +113,23 @@ class UpperFrame(customtkinter.CTkFrame):
 
         button1 = customtkinter.CTkButton(buttons, text="BiB", fg_color="#bf0041", hover_color="#8d0433", text_color='#000000', font=customtkinter.CTkFont(family='times new roman 16 bold', size=20, weight="bold"), command=self.bibtex)
         button1.grid(row=0, column=0, padx=10, pady=10, sticky="news")
-        button2 = customtkinter.CTkButton(buttons, text="SINGLE", fg_color="#bf0041", hover_color="#8d0433", text_color='#000000', font=customtkinter.CTkFont(family='times new roman 16 bold', size=20, weight="bold"), command=self.openWindow)
+        button2 = customtkinter.CTkButton(buttons, text="SINGLE", fg_color="#bf0041", hover_color="#8d0433", text_color='#000000', font=customtkinter.CTkFont(family='times new roman 16 bold', size=20, weight="bold"), command=self.single)
         button2.grid(row=0, column=1, padx=10, pady=10, sticky="news")
+
+    def call_update(self):
+        content_dict = {}
+        with open('cc_email.json') as email_file:
+            content_dict = json.load(email_file)
+        update_and_save(content_dict['email'])
+
+    def update_info_label(self, info):
+        self.label_title.config(text = info)
+
+    def update_left(self, info):
+        self.leftinfo.config(text = info)
+
+    def update_right(self, info):
+        self.rightinfo.config(text = info)
 
     ### bibtex
     def openFileDialog(event=None):
@@ -93,6 +141,11 @@ class UpperFrame(customtkinter.CTkFrame):
 
         if os.path.exists(path) and path.lower().endswith(".bib"):
             dict_information = process_bibtex_file(path)
+
+            content_dict = {}
+            with open('cc_email.json') as email_file:
+                content_dict = json.load(email_file)
+
         else:
             if not bool(path.strip()):
                 pass
@@ -100,12 +153,12 @@ class UpperFrame(customtkinter.CTkFrame):
                 pass
     ### bibtex
     
-    def export_to_pdf(self, data):
+    def export_to_pdf(self):
         filename = filedialog.asksaveasfilename(title="Choose location", filetypes=[("PDF Files", "*.pdf")])
-        create_pdf_and_save(filename, data)
+        create_pdf_and_save(filename, global_data)
         
     ### single
-    def openWindow(self):
+    def single(self):
         if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
             self.toplevel_window = SingleCTk(self) 
             self.toplevel_window.attributes('-topmost', 1)
@@ -114,14 +167,16 @@ class UpperFrame(customtkinter.CTkFrame):
             while self.toplevel_window.closed != True:
                 self.toplevel_window.update()
 
-            k = self.toplevel_window.get_information()  
+            k = self.toplevel_window.get_information()
             self.toplevel_window.destroy_all()
             content_dict = {}
             with open('cc_email.json') as email_file:
                 content_dict = json.load(email_file)
 
-            response_info = contact_crossref_api(k, content_dict['email'])
-            result = process_response(response_info)
+            if k != [] and k != ['','']:
+                response_info = contact_crossref_api(k, content_dict['email'])
+                result = process_response(response_info)
+                print(result)
             
         else:
             self.toplevel_window.focus()
@@ -171,7 +226,8 @@ class SingleCTk(customtkinter.CTkToplevel):
         self.destroy()
 
     def collect(self):
-        self.information = [self.title_input.get(), self.doi_input.get()]
+        self.information.append(self.title_input.get())
+        self.information.append(self.doi_input.get())
         self.closed = True
         self.withdraw()
 
