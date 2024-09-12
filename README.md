@@ -1,5 +1,9 @@
 # CitationCheck
 
+<div align="center">
+<img src="app.png" alt="Screenshot of CitationCheck" width="600"/>
+</div>
+
 ## Quick Start
 
 1. Download **CitationCheck** from [here](https://github.com/BenSt099/CitationCheck/blob/main/).
@@ -7,7 +11,6 @@
 2. Open the application.
 
 3. Upload a `bib`-file by pressing the button _BIB_ or search for a single paper by pressing _SINGLE_.
-
 
 ## Documentation
 

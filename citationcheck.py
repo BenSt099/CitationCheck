@@ -1,7 +1,15 @@
+##################################################################
+##################################################################
+#           /************ CitationCheck ************/            #
+#                             v1.0                               #
+##################################################################
+##################################################################
+
 import os
 import csv
 import json
 import requests
+import threading
 import webbrowser
 import customtkinter
 from tkinter import filedialog
@@ -9,7 +17,6 @@ from tkinter import StringVar
 from PIL import Image
 from pdf import create_pdf_and_save
 from bibtex import process_bibtex_file
-from csvupdate import update_and_save
 
 global_data = {}
 
@@ -29,6 +36,7 @@ def process_response(response_json):
     return information
     
 class UpperFrame(customtkinter.CTkFrame):
+    update_already_in_progress = 0
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
 
@@ -67,7 +75,6 @@ class UpperFrame(customtkinter.CTkFrame):
         self.rightinfo = customtkinter.CTkLabel(middle, text_color="firebrick3", text="Failed: -", height=10, font=customtkinter.CTkFont(family='times new roman 16 bold', size=20, weight="bold"))
         self.rightinfo.grid(row=0, column=1, padx=0, pady=0, sticky="ew")
 
-
         settingsFrame = customtkinter.CTkFrame(master=infoFrame)
         settingsFrame.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
         settingsFrame.configure(fg_color="gray13")
@@ -90,12 +97,14 @@ class UpperFrame(customtkinter.CTkFrame):
         self.radio_down.grid(row=1, column=0, padx=5, pady=2)
 
         image_update = customtkinter.CTkImage(Image.open("update.png"), size=(20,20))
-        label_update = customtkinter.CTkButton(settingsFrame, fg_color = "#8a8888", hover_color="#636262", text_color="black", text="UPDATE", image=image_update, compound="right", font=customtkinter.CTkFont(family='times new roman 14 bold', size=17, weight="bold"), command=self.call_update)
-        label_update.grid(row=0, column=1, padx=10, pady=10)
+        self.btn_text = StringVar()
+        self.label_update = customtkinter.CTkButton(settingsFrame, textvariable=self.btn_text, fg_color = "#8a8888", hover_color="#636262", text_color="black", text="UPDATE", image=image_update, compound="right", font=customtkinter.CTkFont(family='times new roman 14 bold', size=17, weight="bold"), command=self.call_update)
+        self.label_update.grid(row=0, column=1, padx=10, pady=5)
+        self.btn_text.set("UPDATE")
 
         image_pdf = customtkinter.CTkImage(Image.open("filetype-pdf.png"), size=(20,20))
-        label_pdf = customtkinter.CTkButton(settingsFrame, fg_color = "#2a51fa", hover_color="#0c38f5", text_color="black", text="PDF", image=image_pdf, compound="right", font=customtkinter.CTkFont(family='times new roman 14 bold', size=17, weight="bold"), command=self.export_to_pdf)
-        label_pdf.grid(row=0, column=2, padx=10, pady=10)
+        label_pdf = customtkinter.CTkButton(settingsFrame, fg_color = "#3d89cc", hover_color="#2a70ad", text_color="black", text="PDF", image=image_pdf, compound="right", font=customtkinter.CTkFont(family='times new roman 14 bold', size=17, weight="bold"), command=self.export_to_pdf)
+        label_pdf.grid(row=0, column=2, padx=10, pady=5)
         ###########################
 
         controlFrame = customtkinter.CTkFrame(master=self)
@@ -117,19 +126,37 @@ class UpperFrame(customtkinter.CTkFrame):
         button2.grid(row=0, column=1, padx=10, pady=10, sticky="news")
 
     def call_update(self):
-        content_dict = {}
-        with open('cc_email.json') as email_file:
-            content_dict = json.load(email_file)
-        update_and_save(content_dict['email'])
+        if self.update_already_in_progress == 0:
+            content_dict = {}
+            self.update_already_in_progress = 1
+            with open('cc_email.json') as email_file:
+                content_dict = json.load(email_file)
+            
+            self.btn_text.set("Working...")
+            self.update_and_save(content_dict['email'])
+        
+    def return_to_normal_state(self):
+        self.btn_text.set("UPDATE")
+        self.update_already_in_progress = 0
+
+    def update_and_save(self, email_address):
+        threading.Thread(target=self.download_csv, args=(email_address,self.return_to_normal_state), daemon=True).start()
+
+    def download_csv(self, email_address, callback_f):
+        api_url = r"https://api.labs.crossref.org/data/retractionwatch?" + email_address
+        response = requests.get(api_url)
+        with open(os.getcwd() + "/CitationCheck_data_CROSSREF_099.csv", 'wb') as f:
+            f.write(response.content)
+        callback_f()
 
     def update_info_label(self, info):
-        self.label_title.config(text = info)
+        self.label_title.configure(text = info)
 
     def update_left(self, info):
-        self.leftinfo.config(text = info)
+        self.leftinfo.configure(text = info)
 
     def update_right(self, info):
-        self.rightinfo.config(text = info)
+        self.rightinfo.configure(text = info)
 
     ### bibtex
     def openFileDialog(event=None):
