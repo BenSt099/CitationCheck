@@ -183,10 +183,14 @@ class UpperFrame(customtkinter.CTkFrame):
             else:
                 pass
     ############################################################################# bibtex
+
+    def is_data_available(self):
+        return self.single_query_result_csv != []
     
     def export_to_pdf(self):
-        filename = filedialog.asksaveasfilename(title="Choose location", filetypes=[("PDF Files", "*.pdf")])
-        create_pdf_and_save(filename, self.global_data)
+        if self.is_data_available():
+            filename = filedialog.asksaveasfilename(title="Choose location", filetypes=[("PDF Files", "*.pdf")])
+            create_pdf_and_save(filename, self.single_query_result_csv)
         
     ############################################################################# single
     def process_single_query_master_f(self):
@@ -220,7 +224,7 @@ class UpperFrame(customtkinter.CTkFrame):
         threading.Thread(target=self.process_single_query_process_csv, args=(data,self.process_single_query_update_ui), daemon=True).start()
 
     def process_single_query_process_csv(self, data, callback_f):
-        dataset = pd.read_csv('CitationCheck_data_CROSSREF_099.csv')
+        dataset = pd.read_csv('CitationCheck_data_CROSSREF_099.csv', dtype={'OriginalPaperDOI': str, 'Reason': str})
         result_list = []
         if data[1] == '': # use title
             title_set = dataset['Title']
@@ -229,23 +233,21 @@ class UpperFrame(customtkinter.CTkFrame):
             best_match_title = difflib.get_close_matches(data[0], titlelist, n=1, cutoff=0.6)
             if len(best_match_title) == 0 or (len(best_match_title) == 1 and best_match_title[0].strip() == ''):
                 result_list.append(False)
-                result_list.append([])
-                result_list.append([])
             subsettitle = title_set[title_set == best_match_title[0]]
             result_list.append(True)
+            result_list.append(data[0])
             result_list.append(best_match_title[0])
             result_list.append(reason_set[subsettitle.index.item()])
         else: # otherwise, use always doi
-            originalpaperdoi_set = dataset['OriginalPaperDOI']
-            reason_set = dataset['Reason']
+            originalpaperdoi_set = dataset['OriginalPaperDOI'].astype(str)
+            reason_set = dataset['Reason'].astype(str)
             subsetdoi = originalpaperdoi_set[originalpaperdoi_set == data[1]]
             setdoilist = subsetdoi.to_list()
             if len(setdoilist) == 0 or (setdoilist[0] == '' and len(setdoilist) == 1):
                 result_list.append(False)
-                result_list.append([])
-                result_list.append([])
             else:
                 result_list.append(True)
+                result_list.append(data[0])
                 result_list.append(setdoilist[0])
                 result_list.append(reason_set[subsetdoi.index.item()])
         callback_f(result_list)
@@ -253,11 +255,11 @@ class UpperFrame(customtkinter.CTkFrame):
     def process_single_query_update_ui(self, result_list):
         self.label_title.configure(text = "CitationCheck")
         if result_list[0] == False:
-            self.leftinfo.configure(text = "Passed: 0")
-            self.rightinfo.configure(text = "Failed: 1")
-        else:
             self.leftinfo.configure(text = "Passed: 1")
             self.rightinfo.configure(text = "Failed: 0")
-        self.single_query_result_csv = result_list
-
+        else:
+            self.leftinfo.configure(text = "Passed: 0")
+            self.rightinfo.configure(text = "Failed: 1")
+            self.single_query_result_csv.append([result_list[1], result_list[2], result_list[3]])
+        
     ############################################################################# single

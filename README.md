@@ -12,7 +12,7 @@
 
 3. Upload a `bib`-file by pressing the button _BIB_ or search for a single paper by pressing _SINGLE_.
 
-4. Export a detailed report via the `EXPORT`-button.
+4. Export a detailed report via the `PDF`-button.
 
 ## Documentation
 

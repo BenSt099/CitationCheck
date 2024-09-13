@@ -21,7 +21,6 @@ def create_pdf_and_save(filename, data):
     # [entry1],[entry2],[entry3]
     #]
     # [entry1] = [Title, DOI, [Reasons]]
-
     filename = filename + ".pdf"
 
     pdf = PDF_REPORT()
@@ -32,21 +31,45 @@ def create_pdf_and_save(filename, data):
     for i in range(0,len(data)):
         pdf.set_font('Times', 'B', 16)
         pdf.set_text_color(222, 53, 65)
-        # pdf.set_fill_color(222, 53, 65)
-        # pdf.cell(0, 10, data[i][0], 0, 1, fill=True)
-        pdf.cell(0, 10, data[i][0], 0, 1)
+
+        list_of_lines = format_title(data[i][0])
+        for line in list_of_lines:
+            pdf.cell(0, 7, line, 0, 1)
         pdf.set_font('Times', '', 12)
         pdf.set_text_color(0,0,0)
         pdf.cell(0, 6, data[i][1], 0, 1)
-        pdf.cell(0, 6, data[i][2], 0, 1)
+
+        list_of_reasons = format_reasons(data[i][2])
+        for reason in list_of_reasons:
+            reason = reason.strip()
+            if reason != '':
+                pdf.cell(20)
+                pdf.cell(0, 6, reason, 0, 1)
         pdf.cell(0, 6, '', 0, 1)
 
+    pdf.cell(0, 6, '', 0, 1)
+    pdf.set_font('Times', 'I', 8)
+    pdf.cell(0, 5, 'This report was generated using the Open-Source software "CitationCheck".', 0, 1, 'C')
+    pdf.cell(0, 5, 'This report comes without any WARRANTY, without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.', 0, 1, 'C')
     pdf.output(filename, 'F')
 
+def format_title(title):
+    # MAX = 63 characters
+    title_list = []
+    oneline = ''
+    if len(title) <= 63:
+        title_list.append(title)
+        return title_list
+    sections = title.split(' ')
+    for word in sections:
+        if len(oneline) + len(word) <= 63:
+            oneline = oneline + word + ' '
+        else:
+            title_list.append(oneline.strip())
+            oneline = '' + word + ' '
+    if oneline.strip() != '':
+        title_list.append(oneline.strip())
+    return title_list
 
-# ll = []
-# ll.append(["Value1", "10020/32840987023", "Reason1; Reason2"])    
-# ll.append(["Value2", "10020/328443534587023", "Reason1; Reason2"])    
-# ll.append(["Value3", "10020/328404355555555555555345345023", "Reason1; Reason2"])    
-
-# create_pdf_and_save('./example',ll)
+def format_reasons(reasons):
+    return reasons.split(';')
