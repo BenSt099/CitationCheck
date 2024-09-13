@@ -1,24 +1,24 @@
-##################################################################
-##################################################################
-#           /************ CitationCheck ************/            #
-#                             v1.0                               #
-##################################################################
-##################################################################
+###############################################################################################
+###############################################################################################
+#                           /************ CitationCheck ************/                         #
+#                                             v1.0                                            #
+###############################################################################################
+###############################################################################################
 
 import os
-import csv
-import json
-import requests
 import threading
+import difflib
+import pandas as pd
+import requests
+import json
 import webbrowser
 import customtkinter
 from tkinter import filedialog
+from tkinter import IntVar
 from tkinter import StringVar
 from PIL import Image
 from pdf import create_pdf_and_save
 from bibtex import process_bibtex_file
-
-global_data = {}
 
 def contact_crossref_api(data_list, email_address):
                          # data_list = ['title','doi']
@@ -34,9 +34,14 @@ def process_response(response_json):
     except KeyError:
         return -1
     return information
-    
+
+###############################################################################################
+#####################################      UPPERFRAME     #####################################
+###############################################################################################
 class UpperFrame(customtkinter.CTkFrame):
+    global_data = {}
     update_already_in_progress = 0
+    single_query_result_csv = []
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
 
@@ -90,10 +95,11 @@ class UpperFrame(customtkinter.CTkFrame):
         radioFrame.grid_rowconfigure(1, weight=1)
         radioFrame.grid_columnconfigure(0, weight=1)
 
-        radio_var = StringVar(None,"1")
-        self.radio_up = customtkinter.CTkRadioButton(radioFrame, text="Local [CSV]", variable=radio_var, value="1")
+        self.radio_var = IntVar()
+        self.radio_var.set(1)
+        self.radio_up = customtkinter.CTkRadioButton(radioFrame, text="Local [CSV]", variable=self.radio_var, value=1)
         self.radio_up.grid(row=0, column=0, padx=5, pady=2)
-        self.radio_down = customtkinter.CTkRadioButton(radioFrame, text="Online [API]", variable=radio_var, value="2")
+        self.radio_down = customtkinter.CTkRadioButton(radioFrame, text="Online [API]", variable=self.radio_var, value=2)
         self.radio_down.grid(row=1, column=0, padx=5, pady=2)
 
         image_update = customtkinter.CTkImage(Image.open("update.png"), size=(20,20))
@@ -122,8 +128,12 @@ class UpperFrame(customtkinter.CTkFrame):
 
         button1 = customtkinter.CTkButton(buttons, text="BiB", fg_color="#bf0041", hover_color="#8d0433", text_color='#000000', font=customtkinter.CTkFont(family='times new roman 16 bold', size=20, weight="bold"), command=self.bibtex)
         button1.grid(row=0, column=0, padx=10, pady=10, sticky="news")
-        button2 = customtkinter.CTkButton(buttons, text="SINGLE", fg_color="#bf0041", hover_color="#8d0433", text_color='#000000', font=customtkinter.CTkFont(family='times new roman 16 bold', size=20, weight="bold"), command=self.single)
+        button2 = customtkinter.CTkButton(buttons, text="SINGLE", fg_color="#bf0041", hover_color="#8d0433", text_color='#000000', font=customtkinter.CTkFont(family='times new roman 16 bold', size=20, weight="bold"), command=self.process_single_query_master_f)
         button2.grid(row=0, column=1, padx=10, pady=10, sticky="news")
+    
+    ###############################################
+    ############# UPPERFRAME: methods #############
+    ###############################################
 
     def call_update(self):
         if self.update_already_in_progress == 0:
@@ -158,7 +168,7 @@ class UpperFrame(customtkinter.CTkFrame):
     def update_right(self, info):
         self.rightinfo.configure(text = info)
 
-    ### bibtex
+    ############################################################################# bibtex
     def openFileDialog(event=None):
         filepath = filedialog.askopenfilename(filetypes=[("BibTex Files", "*.bib")])
         return filepath
@@ -178,21 +188,21 @@ class UpperFrame(customtkinter.CTkFrame):
                 pass
             else:
                 pass
-    ### bibtex
+    ############################################################################# bibtex
     
     def export_to_pdf(self):
         filename = filedialog.asksaveasfilename(title="Choose location", filetypes=[("PDF Files", "*.pdf")])
-        create_pdf_and_save(filename, global_data)
+        create_pdf_and_save(filename, self.global_data)
         
-    ### single
-    def single(self):
+    ############################################################################# single
+    def process_single_query_master_f(self):
         if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
             self.toplevel_window = SingleCTk(self) 
             self.toplevel_window.attributes('-topmost', 1)
             self.toplevel_window.grab_set()
             
             while self.toplevel_window.closed != True:
-                self.toplevel_window.update()
+                self.toplevel_window.update() # still causing an issue
 
             k = self.toplevel_window.get_information()
             self.toplevel_window.destroy_all()
@@ -200,15 +210,67 @@ class UpperFrame(customtkinter.CTkFrame):
             with open('cc_email.json') as email_file:
                 content_dict = json.load(email_file)
 
-            if k != [] and k != ['','']:
-                response_info = contact_crossref_api(k, content_dict['email'])
-                result = process_response(response_info)
-                print(result)
-            
+            self.label_title.configure(text = "Working...")
+            if self.radio_var.get() == 1: # local [csv]
+                if k != [] and k != ['','']:
+                    self.process_single_query_call_process_csv(k)
+            else: # online [api]
+                if k != [] and k != ['','']:
+                    response_info = contact_crossref_api(k, content_dict['email'])
+                    result = process_response(response_info)
+                    self.process_single_query_update_ui()
         else:
             self.toplevel_window.focus()
-    ### single
 
+    def process_single_query_call_process_csv(self, data):
+        threading.Thread(target=self.process_single_query_process_csv, args=(data,self.process_single_query_update_ui), daemon=True).start()
+
+    def process_single_query_process_csv(self, data, callback_f):
+        dataset = pd.read_csv('CitationCheck_data_CROSSREF_099.csv')
+        result_list = []
+        if data[1] == '': # use title
+            title_set = dataset['Title']
+            reason_set = dataset['Reason']
+            titlelist = title_set.to_list()
+            best_match_title = difflib.get_close_matches(data[0], titlelist, n=1, cutoff=0.6)
+            if len(best_match_title) == 0 or (len(best_match_title) == 1 and best_match_title[0].strip() == ''):
+                result_list.append(False)
+                result_list.append([])
+                result_list.append([])
+            subsettitle = title_set[title_set == best_match_title[0]]
+            result_list.append(True)
+            result_list.append(best_match_title[0])
+            result_list.append(reason_set[subsettitle.index.item()])
+        else: # otherwise, use always doi
+            originalpaperdoi_set = dataset['OriginalPaperDOI']
+            reason_set = dataset['Reason']
+            subsetdoi = originalpaperdoi_set[originalpaperdoi_set == data[1]]
+            setdoilist = subsetdoi.to_list()
+            if len(setdoilist) == 0 or (setdoilist[0] == '' and len(setdoilist) == 1):
+                result_list.append(False)
+                result_list.append([])
+                result_list.append([])
+            else:
+                result_list.append(True)
+                result_list.append(setdoilist[0])
+                result_list.append(reason_set[subsetdoi.index.item()])
+        callback_f(result_list)
+    
+    def process_single_query_update_ui(self, result_list):
+        self.label_title.configure(text = "CitationCheck")
+        if result_list[0] == False:
+            self.leftinfo.configure(text = "Passed: 0")
+            self.rightinfo.configure(text = "Failed: 1")
+        else:
+            self.leftinfo.configure(text = "Passed: 1")
+            self.rightinfo.configure(text = "Failed: 0")
+        self.single_query_result_csv = result_list
+
+    ############################################################################# single
+
+###############################################################################################
+#####################################      SINGLECTK      #####################################
+###############################################################################################
 class SingleCTk(customtkinter.CTkToplevel):
     information = []
     closed = False
@@ -261,6 +323,9 @@ class SingleCTk(customtkinter.CTkToplevel):
     def get_information(self):
         return self.information
 
+###############################################################################################
+#####################################      LOWERFRAME     #####################################
+###############################################################################################
 class LowerFrame(customtkinter.CTkFrame):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
@@ -302,6 +367,9 @@ class LowerFrame(customtkinter.CTkFrame):
     def openGitHubIssue(self):
         webbrowser.open_new(r"https://github.com/BenSt099/CitationCheck/issues")
 
+###############################################################################################
+#####################################       MAINAPP       #####################################
+###############################################################################################
 class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()

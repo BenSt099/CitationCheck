@@ -14,7 +14,11 @@
 
 ## Documentation
 
-The documentation is avaiable [here](https://github.com/BenSt099/CitationCheck/blob/main/docs/citationcheck_doc.pdf).
+The documentation is available [here](https://github.com/BenSt099/CitationCheck/blob/main/docs/citationcheck_doc.pdf).
+
+## Dependencies
+
+The application uses the following external libraries: `pandas`, `PIL`, `customtkinter`, `tkinter`.
 
 ## Disclaimer
 
