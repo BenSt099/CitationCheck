@@ -12,6 +12,8 @@
 
 3. Upload a `bib`-file by pressing the button _BIB_ or search for a single paper by pressing _SINGLE_.
 
+4. Export a detailed report via the `EXPORT`-button.
+
 ## Documentation
 
 The documentation is available [here](https://github.com/BenSt099/CitationCheck/blob/main/docs/citationcheck_doc.pdf).
