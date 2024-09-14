@@ -193,6 +193,7 @@ class UpperFrame(customtkinter.CTkFrame):
             create_pdf_and_save(filename, self.single_query_result_csv)
         
     ############################################################################# single
+        
     def process_single_query_master_f(self):
         if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
             self.toplevel_window = singlectk.SingleCTk(self) 
@@ -200,25 +201,22 @@ class UpperFrame(customtkinter.CTkFrame):
             self.toplevel_window.grab_set()
             
             while self.toplevel_window.closed != True:
-                self.toplevel_window.update() # still causing an issue
+                self.toplevel_window.update()
 
             k = self.toplevel_window.get_information()
-            self.toplevel_window.destroy_all()
+            self.toplevel_window.destroy_window()
             content_dict = {}
             with open('cc_email.json') as email_file:
                 content_dict = json.load(email_file)
 
-            self.label_title.configure(text = "Working...")
             if self.radio_var.get() == 1: # local [csv]
                 if k != [] and k != ['','']:
+                    self.label_title.configure(text = "Working...")
                     self.process_single_query_call_process_csv(k)
             else: # online [api]
                 if k != [] and k != ['','']:
+                    self.label_title.configure(text = "Working...")
                     self.process_single_query_call_process_api(k, content_dict['email'])
-
-                    # response_info = contact_crossref_api(k, content_dict['email'])
-                    # result = process_response(response_info)
-                    #self.process_single_query_update_ui()
         else:
             self.toplevel_window.focus()
 

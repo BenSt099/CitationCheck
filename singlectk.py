@@ -17,6 +17,8 @@ class SingleCTk(customtkinter.CTkToplevel):
         self.grid_rowconfigure(3) 
         self.grid_columnconfigure(2)
 
+        self.protocol("WM_DELETE_WINDOW", self.close)
+
         ###############################################################################
         ### Title ###
         image_questionmark = customtkinter.CTkImage(Image.open("icon_questionmark.png"), size=(16,16))
@@ -44,14 +46,14 @@ class SingleCTk(customtkinter.CTkToplevel):
         self.closed = True
         self.withdraw()
 
-    def destroy_all(self):
+    def destroy_window(self):
         self.destroy()
 
     def collect(self):
         self.information.append(self.title_input.get())
         self.information.append(self.doi_input.get())
-        self.closed = True
         self.withdraw()
+        self.closed = True
 
     def get_information(self):
         return self.information
