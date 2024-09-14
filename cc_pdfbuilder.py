@@ -17,7 +17,7 @@ class PDF_REPORT(FPDF):
         self.set_font('Arial', 'I', 8)
         self.cell(0, 10, 'Page ' + str(self.page_no()) + '/{nb}', 0, 0, 'C')
 
-def create_pdf_and_save(filename, data):
+def cc_build_and_save_pdf(filename, data):
     # data = [
     # [entry1],[entry2],[entry3]
     #]

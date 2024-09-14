@@ -49,13 +49,3 @@ def process_bibtex_file(bibfile):
             continue
         dict_ret.append(entry)
     return dict_ret
-
-# aa = process_bibtex_file('refs.bib')
-# print(aa)
-# print(clear_title("title = {Fractals, fractal dimensions and landscapes - a review}"))
-# print(clear_title('title="title"'))
-
-# print(clear_doi(r"doi={https://doi.org/10.1021/ci025584y}"))
-# print(clear_doi(r'-doi = {https://doi.org/10.1016/0378-4371(96)00127-6}'))
-# print(clear_doi(r'doi="10.1007/978-3-642-61717-1"'))
-# print(clear_doi(r'-doi="10.1007/978-3-642-61717-1"'))

@@ -7,9 +7,9 @@ from pandas import read_csv
 from PIL import Image
 from requests import get
 from json import load
-from pdf import create_pdf_and_save
-from bibtex import process_bibtex_file
-import singlectk
+from cc_pdfbuilder import cc_build_and_save_pdf
+from cc_process_bibtex import process_bibtex_file
+import cc_singlectk
 from tkinter import filedialog
 from tkinter import IntVar
 from tkinter import StringVar
@@ -156,9 +156,6 @@ class UpperFrame(CTkFrame):
         if exists(path) and path.lower().endswith(".bib"):
             data = process_bibtex_file(path)
             # ['short title', 'title', 'doi']
-            content_dict = {}
-            with open('cc_email.json') as email_file:
-                content_dict = load(email_file)
 
             if self.radio_var.get() == 1: # local [csv]
                 if data != [] and data != ['','']:
@@ -212,13 +209,13 @@ class UpperFrame(CTkFrame):
     def export_to_pdf(self):
         if self.is_data_available():
             filename = filedialog.asksaveasfilename(title="Choose location", filetypes=[("PDF Files", "*.pdf")])
-            create_pdf_and_save(filename, self.query_result_csv)
+            cc_build_and_save_pdf(filename, self.query_result_csv)
         
     ############################################################################# single
         
     def process_single_query_master_f(self):
         if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
-            self.toplevel_window = singlectk.SingleCTk(self) 
+            self.toplevel_window = cc_singlectk.SingleCTk(self) 
             self.toplevel_window.attributes('-topmost', 1)
             self.toplevel_window.grab_set()
             
