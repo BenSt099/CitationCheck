@@ -11,22 +11,18 @@ def clear_title(title_raw):
 def clear_doi(doi_raw):
     doi_raw  = doi_raw.strip()
     doi_raw = doi_raw[:-1]
-
     x = re.split(r"doi\s*=\s*", doi_raw)
     doi_cleaned = x[1]
     doi_cleaned = doi_cleaned[1:]
-
     if "https://doi.org/" in doi_cleaned:
         doi_cleaned = re.sub("https://doi.org/", "", doi_cleaned)     
-
     return doi_cleaned
 
 def process_bibtex_file(bibfile):
     content = ""
     with open(bibfile, mode="r", encoding="utf-8") as bib_file:
         content = bib_file.read()
-    dict_ret = {}
-    e = 1
+    dict_ret = []
     for x in content.split("@"):
         x = x.strip()
         x = x[:-1]
@@ -48,10 +44,7 @@ def process_bibtex_file(bibfile):
 
         if entry == []:
             continue
-
-        dict_ret['e'+ str(e)] = entry
-        e = e + 1
-
+        dict_ret.append(entry)
     return dict_ret
 
 # aa = process_bibtex_file('refs.bib')

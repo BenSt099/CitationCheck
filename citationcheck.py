@@ -40,7 +40,7 @@ class App(customtkinter.CTk):
             content_dict = json.load(email_file)
 
         if content_dict == {}:
-            dialog = customtkinter.CTkInputDialog(text="Please type in your e-mail address:", title="EMail-Address", button_fg_color="#bf0041", button_hover_color="#8d0433", button_text_color="black", font=customtkinter.CTkFont(family='times new roman 16 bold', size=17, weight="bold"))
+            dialog = customtkinter.CTkInputDialog(text="Please type in your email address:", title="Email address", button_fg_color="#bf0041", button_hover_color="#8d0433", button_text_color="black", font=customtkinter.CTkFont(family='times new roman 16 bold', size=17, weight="bold"))
             email = dialog.get_input()
             content_dict = {
                 'email': email

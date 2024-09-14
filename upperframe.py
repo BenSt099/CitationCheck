@@ -5,6 +5,7 @@ from pdf import create_pdf_and_save
 from bibtex import process_bibtex_file
 import os
 import threading
+from multiprocessing import Pool
 import difflib
 import pandas as pd
 import customtkinter
@@ -35,7 +36,7 @@ import singlectk
 class UpperFrame(customtkinter.CTkFrame):
     global_data = {}
     update_already_in_progress = 0
-    single_query_result_csv = []
+    query_result_csv = []
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
 
@@ -120,7 +121,7 @@ class UpperFrame(customtkinter.CTkFrame):
         buttons.grid_columnconfigure(0, weight=1)
         buttons.grid_columnconfigure(1, weight=1)
 
-        button1 = customtkinter.CTkButton(buttons, text="BiB", fg_color="#bf0041", hover_color="#8d0433", text_color='#000000', font=customtkinter.CTkFont(family='times new roman 16 bold', size=20, weight="bold"), command=self.bibtex)
+        button1 = customtkinter.CTkButton(buttons, text="BiB", fg_color="#bf0041", hover_color="#8d0433", text_color='#000000', font=customtkinter.CTkFont(family='times new roman 16 bold', size=20, weight="bold"), command=self.process_bibtex_query_master_f)
         button1.grid(row=0, column=0, padx=10, pady=10, sticky="news")
         button2 = customtkinter.CTkButton(buttons, text="SINGLE", fg_color="#bf0041", hover_color="#8d0433", text_color='#000000', font=customtkinter.CTkFont(family='times new roman 16 bold', size=20, weight="bold"), command=self.process_single_query_master_f)
         button2.grid(row=0, column=1, padx=10, pady=10, sticky="news")
@@ -163,34 +164,73 @@ class UpperFrame(customtkinter.CTkFrame):
         self.rightinfo.configure(text = info)
 
     ############################################################################# bibtex
+    
     def openFileDialog(event=None):
         filepath = filedialog.askopenfilename(filetypes=[("BibTex Files", "*.bib")])
         return filepath
         
-    def bibtex(self):
+    def process_bibtex_query_master_f(self):
         path = self.openFileDialog()
 
         if os.path.exists(path) and path.lower().endswith(".bib"):
-            dict_information = process_bibtex_file(path)
-
+            data = process_bibtex_file(path)
+            # ['short title', 'title', 'doi']
             content_dict = {}
             with open('cc_email.json') as email_file:
                 content_dict = json.load(email_file)
 
-        else:
-            if not bool(path.strip()):
-                pass
+            if self.radio_var.get() == 1: # local [csv]
+                if data != [] and data != ['','']:
+                    self.label_title.configure(text = "Working...")
+                    self.process_bibtex_query_call_process_bibtex_csv(data)
+
+            else: # online [api]
+                if data != [] and data != ['','']:
+                    self.label_title.configure(text = "Working...")
+                    self.process_bibtex_query_call_process_bibtex_api(data, content_dict['email'])
+    
+    def process_bibtex_query_call_process_bibtex_csv(self, data):
+        threading.Thread(target=self.process_bibtex_csv, args=(data,self.process_bibtex_query_update_ui), daemon=True).start()
+
+    def process_bibtex_query_call_process_bibtex_api(self, data):
+        threading.Thread(target=self.process_bibtex_api, args=(data,self.process_bibtex_query_update_ui), daemon=True).start()
+
+    def process_bibtex_query_update_ui(self, results):
+        self.label_title.configure(text = "CitationCheck")
+        passed = 0
+        failed = 0
+        for result_entry in results:
+            if result_entry[0] == False:
+                passed = passed + 1    
             else:
-                pass
+                self.query_result_csv.append([result_entry[1], result_entry[2], result_entry[3]])
+                failed = failed + 1
+        self.leftinfo.configure(text = "Passed: " + str(passed))
+        self.rightinfo.configure(text = "Failed: " + str(failed))
+
+    ### bibtex - api
+
+    def process_bibtex_csv(self, data, callback_f):
+        results = []
+        with Pool() as pool:
+            results = pool.map(search_in_csv, data)
+        callback_f(results)
+
+    ### bibtex - api
+
+    def process_bibtex_api(self, data, callback_f):
+        
+        callback_f()
+
     ############################################################################# bibtex
 
     def is_data_available(self):
-        return self.single_query_result_csv != []
+        return self.query_result_csv != []
     
     def export_to_pdf(self):
         if self.is_data_available():
             filename = filedialog.asksaveasfilename(title="Choose location", filetypes=[("PDF Files", "*.pdf")])
-            create_pdf_and_save(filename, self.single_query_result_csv)
+            create_pdf_and_save(filename, self.query_result_csv)
         
     ############################################################################# single
         
@@ -260,7 +300,7 @@ class UpperFrame(customtkinter.CTkFrame):
         else:
             self.leftinfo.configure(text = "Passed: 0")
             self.rightinfo.configure(text = "Failed: 1")
-            self.single_query_result_csv.append([result_list[1], result_list[2], result_list[3]])
+            self.query_result_csv.append([result_list[1], result_list[2], result_list[3]])
         
     def process_single_query_call_process_api(self, data, email_address):
         threading.Thread(target=self.process_single_query_process_api, args=(data, email_address, self.process_single_query_update_ui), daemon=True).start()
@@ -285,3 +325,39 @@ class UpperFrame(customtkinter.CTkFrame):
         callback_f(result_list)
 
     ############################################################################# single
+
+def search_in_csv(entry):
+    data = []
+    data.append(entry[1])
+    if len(entry) > 2:
+        data.append(entry[2])
+    else:
+        data.append('')
+    dataset = pd.read_csv('CitationCheck_data_CROSSREF_099.csv', dtype={'OriginalPaperDOI': str, 'Reason': str})
+    result_list = []
+    if data[1] == '': # use title
+        title_set = dataset['Title']
+        reason_set = dataset['Reason']
+        titlelist = title_set.to_list()
+        best_match_title = difflib.get_close_matches(data[0], titlelist, n=1, cutoff=0.6)
+        if len(best_match_title) == 0 or (len(best_match_title) == 1 and best_match_title[0].strip() == ''):
+            result_list.append(False)
+        else:    
+            subsettitle = title_set[title_set == best_match_title[0]]
+            result_list.append(True)
+            result_list.append(data[0] + ' [' +  entry[0] + ']')
+            result_list.append(best_match_title[0])
+            result_list.append(reason_set[subsettitle.index.item()])
+    else: # otherwise, use always doi
+        originalpaperdoi_set = dataset['OriginalPaperDOI'].astype(str)
+        reason_set = dataset['Reason'].astype(str)
+        subsetdoi = originalpaperdoi_set[originalpaperdoi_set == data[1]]
+        setdoilist = subsetdoi.to_list()
+        if len(setdoilist) == 0 or (setdoilist[0] == '' and len(setdoilist) == 1):
+            result_list.append(False)
+        else:
+            result_list.append(True)
+            result_list.append(data[0] + ' [' + entry[0] + ']')
+            result_list.append(setdoilist[0])
+            result_list.append(reason_set[subsetdoi.index.item()])
+    return result_list
