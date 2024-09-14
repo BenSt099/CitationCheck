@@ -1,39 +1,24 @@
-from tkinter import filedialog
-from tkinter import IntVar
-from tkinter import StringVar
-from pdf import create_pdf_and_save
-from bibtex import process_bibtex_file
 from os import getcwd
 from os.path import exists
 from threading import Thread
 from multiprocessing import Pool
 from difflib import get_close_matches
 from pandas import read_csv
+from PIL import Image
+from requests import get
+from json import load
+from pdf import create_pdf_and_save
+from bibtex import process_bibtex_file
+import singlectk
+from tkinter import filedialog
+from tkinter import IntVar
+from tkinter import StringVar
 from customtkinter import CTkFont
 from customtkinter import CTkButton
 from customtkinter import CTkLabel
 from customtkinter import CTkFrame
 from customtkinter import CTkImage
 from customtkinter import CTkRadioButton
-from PIL import Image
-from requests import get
-from json import load
-import singlectk
-
-# def contact_crossref_api(data_list, email_address):
-#                          # data_list = ['title','doi']
-    
-#     api_url = "https://api.labs.crossref.org/works/" + data_list[1] + "?mailto=" + email_address
-#     response = requests.get(api_url)
-#     return response.json()
-
-# def process_response(response_json):
-#     print(response_json)
-#     try:
-#         information = response_json['message']['cr-labs-updates'][0]['reasons']
-#     except KeyError:
-#         return -1
-#     return information
 
 ###############################################################################################
 #####################################      UPPERFRAME     #####################################
@@ -182,7 +167,7 @@ class UpperFrame(CTkFrame):
             else: # online [api]
                 if data != [] and data != ['','']:
                     self.label_title.configure(text = "Working...")
-                    self.process_bibtex_query_call_process_bibtex_api(data, content_dict['email'])
+                    self.process_bibtex_query_call_process_bibtex_api(data)
     
     def process_bibtex_query_call_process_bibtex_csv(self, data):
         Thread(target=self.process_bibtex_csv, args=(data,self.process_bibtex_query_update_ui), daemon=True).start()
@@ -214,8 +199,10 @@ class UpperFrame(CTkFrame):
     ### bibtex - api
 
     def process_bibtex_api(self, data, callback_f):
-        
-        callback_f()
+        results = []
+        with Pool() as pool:
+            results = pool.map(search_api, data)
+        callback_f(results)
 
     ############################################################################# bibtex
 
@@ -321,6 +308,10 @@ class UpperFrame(CTkFrame):
 
     ############################################################################# single
 
+###############################################################################################
+#####################################      UPPERFRAME     #####################################
+###############################################################################################
+
 def search_in_csv(entry):
     data = []
     data.append(entry[1])
@@ -355,4 +346,35 @@ def search_in_csv(entry):
             result_list.append(data[0] + ' [' + entry[0] + ']')
             result_list.append(setdoilist[0])
             result_list.append(reason_set[subsetdoi.index.item()])
+    return result_list
+
+def search_api(entry):
+    # entry = [name, title, doi]
+    data = []
+    result_list = []
+    data.append(entry[1])
+    if len(entry) > 2:
+        data.append(entry[2])
+    else:
+        data.append('')
+    with open('cc_email.json') as email_file:
+        content_dict = load(email_file)
+    
+    if data[1] != '':
+        api_url = "https://api.labs.crossref.org/works/" + data[1] + "?mailto=" + content_dict['email']
+        response = get(api_url)
+        result_json = response.json()
+        try:
+            information = result_json['message']['cr-labs-updates'][0]['reasons']
+            compressed = ''
+            for x in information:
+                compressed = compressed + '+' + x + ';'
+            result_list.append(True)
+            result_list.append(data[0] + ' [' + entry[0] + ']')
+            result_list.append(data[1])
+            result_list.append(compressed)
+        except KeyError:
+            result_list.append(False)
+    else:
+        result_list.append(False)
     return result_list
