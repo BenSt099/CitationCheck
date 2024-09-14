@@ -14,20 +14,20 @@ import json
 import customtkinter
 import singlectk
 
-def contact_crossref_api(data_list, email_address):
-                         # data_list = ['title','doi']
+# def contact_crossref_api(data_list, email_address):
+#                          # data_list = ['title','doi']
     
-    api_url = "https://api.labs.crossref.org/works/" + data_list[1] + "?mailto=" + email_address
-    response = requests.get(api_url)
-    return response.json()
+#     api_url = "https://api.labs.crossref.org/works/" + data_list[1] + "?mailto=" + email_address
+#     response = requests.get(api_url)
+#     return response.json()
 
-def process_response(response_json):
-    print(response_json)
-    try:
-        information = response_json['message']['cr-labs-updates'][0]['reasons']
-    except KeyError:
-        return -1
-    return information
+# def process_response(response_json):
+#     print(response_json)
+#     try:
+#         information = response_json['message']['cr-labs-updates'][0]['reasons']
+#     except KeyError:
+#         return -1
+#     return information
 
 ###############################################################################################
 #####################################      UPPERFRAME     #####################################
@@ -214,9 +214,11 @@ class UpperFrame(customtkinter.CTkFrame):
                     self.process_single_query_call_process_csv(k)
             else: # online [api]
                 if k != [] and k != ['','']:
-                    response_info = contact_crossref_api(k, content_dict['email'])
-                    result = process_response(response_info)
-                    self.process_single_query_update_ui()
+                    self.process_single_query_call_process_api(k, content_dict['email'])
+
+                    # response_info = contact_crossref_api(k, content_dict['email'])
+                    # result = process_response(response_info)
+                    #self.process_single_query_update_ui()
         else:
             self.toplevel_window.focus()
 
@@ -262,4 +264,26 @@ class UpperFrame(customtkinter.CTkFrame):
             self.rightinfo.configure(text = "Failed: 1")
             self.single_query_result_csv.append([result_list[1], result_list[2], result_list[3]])
         
+    def process_single_query_call_process_api(self, data, email_address):
+        threading.Thread(target=self.process_single_query_process_api, args=(data, email_address, self.process_single_query_update_ui), daemon=True).start()
+
+    def process_single_query_process_api(self, data, email_address, callback_f):
+                                             # data = ['title','doi']
+        result_list = []
+        api_url = "https://api.labs.crossref.org/works/" + data[1] + "?mailto=" + email_address
+        response = requests.get(api_url)
+        result_json = response.json()
+        try:
+            information = result_json['message']['cr-labs-updates'][0]['reasons']
+            compressed = ''
+            for x in information:
+                compressed = compressed + '+' + x + ';'
+            result_list.append(True)
+            result_list.append(data[0])
+            result_list.append(data[1])
+            result_list.append(compressed)
+        except KeyError:
+            result_list.append(False)
+        callback_f(result_list)
+
     ############################################################################# single
