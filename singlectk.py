@@ -1,10 +1,14 @@
-import customtkinter
+from customtkinter import CTkFont
+from customtkinter import CTkButton
+from customtkinter import CTkEntry
+from customtkinter import CTkToplevel
+from customtkinter import CTkImage
 from PIL import Image
 
 ###############################################################################################
 #####################################      SINGLECTK      #####################################
 ###############################################################################################
-class SingleCTk(customtkinter.CTkToplevel):
+class SingleCTk(CTkToplevel):
     information = []
     closed = False
     def __init__(self, *args, **kwargs):
@@ -21,24 +25,24 @@ class SingleCTk(customtkinter.CTkToplevel):
 
         ###############################################################################
         ### Title ###
-        image_questionmark = customtkinter.CTkImage(Image.open("icon_questionmark.png"), size=(16,16))
-        self.label_title = customtkinter.CTkButton(self, fg_color = "transparent", hover_color="#181818", text="Title", image=image_questionmark, compound="right", font=customtkinter.CTkFont(family='times new roman 14 bold', size=17, weight="bold"))
+        image_questionmark = CTkImage(Image.open("icon_questionmark.png"), size=(16,16))
+        self.label_title = CTkButton(self, fg_color = "transparent", hover_color="#181818", text="Title", image=image_questionmark, compound="right", font=CTkFont(family='times new roman 14 bold', size=17, weight="bold"))
         self.label_title.grid(row=0, column=0, padx=20, pady=20)
 
-        self.title_input = customtkinter.CTkEntry(self, placeholder_text="Title", width=500, height=35)
+        self.title_input = CTkEntry(self, placeholder_text="Title", width=500, height=35)
         self.title_input.grid(row=0, column=1, padx=20, pady=20)
         ###############################################################################
         ### DOI ###
-        self.label_doi = customtkinter.CTkButton(self, fg_color = "transparent", hover_color="#181818", text="DOI", image=image_questionmark, compound="right", font=customtkinter.CTkFont(family='times new roman 14 bold', size=17, weight="bold"))
+        self.label_doi = CTkButton(self, fg_color = "transparent", hover_color="#181818", text="DOI", image=image_questionmark, compound="right", font=CTkFont(family='times new roman 14 bold', size=17, weight="bold"))
         self.label_doi.grid(row=1, column=0, padx=20, pady=20)
 
-        self.doi_input = customtkinter.CTkEntry(self, placeholder_text="DOI", width=500, height=35)
+        self.doi_input = CTkEntry(self, placeholder_text="DOI", width=500, height=35)
         self.doi_input.grid(row=1, column=1, padx=20, pady=20)
         ###############################################################################
         ### Buttons ###
-        self.button1 = customtkinter.CTkButton(self, text="Cancel", fg_color="#bf0041", hover_color="#8d0433", text_color='#000000', font=customtkinter.CTkFont(family='times new roman 16 bold', size=20, weight="bold"), command=self.close)      
+        self.button1 = CTkButton(self, text="Cancel", fg_color="#bf0041", hover_color="#8d0433", text_color='#000000', font=CTkFont(family='times new roman 16 bold', size=20, weight="bold"), command=self.close)      
         self.button1.grid(row=2, column=0, padx=20, pady=20, sticky="ew")
-        self.button2 = customtkinter.CTkButton(self, text="CHECK", fg_color="#bf0041", hover_color="#8d0433", text_color='#000000', font=customtkinter.CTkFont(family='times new roman 16 bold', size=20, weight="bold"), command=self.collect)
+        self.button2 = CTkButton(self, text="CHECK", fg_color="#bf0041", hover_color="#8d0433", text_color='#000000', font=CTkFont(family='times new roman 16 bold', size=20, weight="bold"), command=self.collect)
         self.button2.grid(row=2, column=2, padx=20, pady=20, sticky="ew")
         ###############################################################################
 

@@ -1,9 +1,12 @@
-import re
+from re import sub
+from re import split
+from re import search
+from re import sub
 
 def clear_title(title_raw):
     title_raw = title_raw.strip()
     title_raw = title_raw[:-1]
-    x = re.split(r"^title\s*=\s*", title_raw)
+    x = split(r"^title\s*=\s*", title_raw)
     title_cleaned = x[1]
     title_cleaned = title_cleaned[1:]
     return title_cleaned
@@ -11,11 +14,11 @@ def clear_title(title_raw):
 def clear_doi(doi_raw):
     doi_raw  = doi_raw.strip()
     doi_raw = doi_raw[:-1]
-    x = re.split(r"doi\s*=\s*", doi_raw)
+    x = split(r"doi\s*=\s*", doi_raw)
     doi_cleaned = x[1]
     doi_cleaned = doi_cleaned[1:]
     if "https://doi.org/" in doi_cleaned:
-        doi_cleaned = re.sub("https://doi.org/", "", doi_cleaned)     
+        doi_cleaned = sub("https://doi.org/", "", doi_cleaned)     
     return doi_cleaned
 
 def process_bibtex_file(bibfile):
@@ -32,14 +35,14 @@ def process_bibtex_file(bibfile):
             if line.endswith(','):
                 line = line[:-1]
 
-            if re.search(r"^[a-zA-Z]+\{.+$", line):                
-                x = re.split(r"\{", line)
+            if search(r"^[a-zA-Z]+\{.+$", line):                
+                x = split(r"\{", line)
                 entry.append(x[1].strip())
 
-            if re.search(r"^title\s*=\s*.+$", line):
+            if search(r"^title\s*=\s*.+$", line):
                 entry.append(clear_title(line))
             
-            if re.search(r"doi\s*=\s*.+", line):
+            if search(r"doi\s*=\s*.+", line):
                 entry.append(clear_doi(line))
 
         if entry == []:
