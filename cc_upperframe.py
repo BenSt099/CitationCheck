@@ -19,6 +19,7 @@ from customtkinter import CTkLabel
 from customtkinter import CTkFrame
 from customtkinter import CTkImage
 from customtkinter import CTkRadioButton
+from customtkinter import get_appearance_mode
 
 ###############################################################################################
 #####################################      UPPERFRAME     #####################################
@@ -30,9 +31,23 @@ class UpperFrame(CTkFrame):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
 
-        self.configure(fg_color="black")
-        self.toplevel_window = None
+        ###########################
 
+        if get_appearance_mode() == 'Light':
+            textcolor = "black"
+            hovercolor = "#d9d8d7"  
+            textbuttoncolor = "white"
+            buttonFrameColor = "transparent"
+        else:
+            buttonFrameColor = "gray13"
+            textbuttoncolor = "black"
+            textcolor = "white"
+            hovercolor = "gray13"
+
+        ###########################
+        
+        self.configure(fg_color=textbuttoncolor)
+        self.toplevel_window = None
         self.grid_rowconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=1)
         self.grid_rowconfigure(2, weight=1)
@@ -41,20 +56,19 @@ class UpperFrame(CTkFrame):
         self.grid_rowconfigure(5, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-        infoFrame = CTkFrame(master=self)
+        infoFrame = CTkFrame(master=self, fg_color=hovercolor)
         infoFrame.grid(row=1, column=0, rowspan=4, padx=10, pady=10, sticky="ew")
         infoFrame.grid_rowconfigure(0, weight=1)
         infoFrame.grid_rowconfigure(1, weight=1)
         infoFrame.grid_rowconfigure(2, weight=1)
         infoFrame.grid_columnconfigure(0, weight=1)
-
-        ###########################
+        
         image_cc_icon = CTkImage(Image.open("logo.png"), size=(21,21))
-        self.label_title = CTkButton(infoFrame, fg_color = "gray13", hover_color="gray13", text="CitationCheck", image=image_cc_icon, compound="left", font=CTkFont(family='times new roman 14 bold', size=20, weight="bold"))
+        self.label_title = CTkButton(infoFrame, fg_color=hovercolor, hover_color=hovercolor, text_color=textcolor, text="CitationCheck", image=image_cc_icon, compound="left", font=CTkFont(family='times new roman 14 bold', size=20, weight="bold"))
         self.label_title.grid(row=0, column=0, padx=10, pady=10)
 
         middle = CTkFrame(master=infoFrame)
-        middle.configure(fg_color="gray13")
+        middle.configure(fg_color=hovercolor)
         middle.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
         middle.grid_rowconfigure(0, weight=1)
         middle.grid_columnconfigure(0, weight=1)
@@ -67,7 +81,7 @@ class UpperFrame(CTkFrame):
 
         settingsFrame = CTkFrame(master=infoFrame)
         settingsFrame.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
-        settingsFrame.configure(fg_color="gray13")
+        settingsFrame.configure(fg_color=hovercolor)
         settingsFrame.grid_rowconfigure(0, weight=1)
         settingsFrame.grid_columnconfigure(0, weight=1)
         settingsFrame.grid_columnconfigure(1, weight=1)
@@ -75,7 +89,7 @@ class UpperFrame(CTkFrame):
 
         radioFrame = CTkFrame(master=settingsFrame)
         radioFrame.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
-        radioFrame.configure(fg_color="gray13")
+        radioFrame.configure(fg_color=hovercolor)
         radioFrame.grid_rowconfigure(0, weight=1)
         radioFrame.grid_rowconfigure(1, weight=1)
         radioFrame.grid_columnconfigure(0, weight=1)
@@ -99,21 +113,22 @@ class UpperFrame(CTkFrame):
         ###########################
 
         controlFrame = CTkFrame(master=self)
+        controlFrame.configure(fg_color=hovercolor)
         controlFrame.grid(row=5, column=0, padx=10, pady=10, sticky="ew")
-        controlFrame.configure(fg_color="gray13")
         controlFrame.grid_rowconfigure(0, weight=1)
         controlFrame.grid_columnconfigure(0, weight=1)
 
         buttons = CTkFrame(master=controlFrame)
         buttons.grid(row=0, column=0, padx=100, pady=5, sticky="ew")
-        buttons.configure(fg_color="gray13")
+        
+        buttons.configure(fg_color=hovercolor)
         buttons.grid_rowconfigure(0, weight=1)
         buttons.grid_columnconfigure(0, weight=1)
         buttons.grid_columnconfigure(1, weight=1)
 
-        button1 = CTkButton(buttons, text="BiB", fg_color="#bf0041", hover_color="#8d0433", text_color='#000000', font=CTkFont(family='times new roman 16 bold', size=20, weight="bold"), command=self.process_bibtex_query_master_f)
+        button1 = CTkButton(buttons, text="BiB", fg_color="#bf0041", hover_color="#8d0433", text_color=textbuttoncolor, font=CTkFont(family='times new roman 16 bold', size=20, weight="bold"), command=self.process_bibtex_query_master_f)
         button1.grid(row=0, column=0, padx=10, pady=10, sticky="news")
-        button2 = CTkButton(buttons, text="SINGLE", fg_color="#bf0041", hover_color="#8d0433", text_color='#000000', font=CTkFont(family='times new roman 16 bold', size=20, weight="bold"), command=self.process_single_query_master_f)
+        button2 = CTkButton(buttons, text="SINGLE", fg_color="#bf0041", hover_color="#8d0433", text_color=textbuttoncolor, font=CTkFont(family='times new roman 16 bold', size=20, weight="bold"), command=self.process_single_query_master_f)
         button2.grid(row=0, column=1, padx=10, pady=10, sticky="news")
     
     ###############################################
