@@ -5,6 +5,7 @@ from multiprocessing import Pool
 from difflib import get_close_matches
 from pandas import read_csv
 from PIL import Image
+from re import sub
 from requests import get
 from json import load
 from cc_pdfbuilder import cc_build_and_save_pdf
@@ -37,9 +38,7 @@ class UpperFrame(CTkFrame):
             textcolor = "black"
             hovercolor = "#d9d8d7"  
             textbuttoncolor = "white"
-            buttonFrameColor = "transparent"
         else:
-            buttonFrameColor = "gray13"
             textbuttoncolor = "black"
             textcolor = "white"
             hovercolor = "gray13"
@@ -200,8 +199,7 @@ class UpperFrame(CTkFrame):
         self.leftinfo.configure(text = "Passed: " + str(passed))
         self.rightinfo.configure(text = "Failed: " + str(failed))
 
-    ### bibtex - api
-
+    ### bibtex - csv
     def process_bibtex_csv(self, data, callback_f):
         results = []
         with Pool() as pool:
@@ -209,7 +207,6 @@ class UpperFrame(CTkFrame):
         callback_f(results)
 
     ### bibtex - api
-
     def process_bibtex_api(self, data, callback_f):
         results = []
         with Pool() as pool:
@@ -275,7 +272,12 @@ class UpperFrame(CTkFrame):
         else: # otherwise, use always doi
             originalpaperdoi_set = dataset['OriginalPaperDOI'].astype(str)
             reason_set = dataset['Reason'].astype(str)
-            subsetdoi = originalpaperdoi_set[originalpaperdoi_set == data[1]]
+            doi_cleaned = data[1]
+            
+            if "https://doi.org/" in doi_cleaned:
+                doi_cleaned = sub("https://doi.org/", "", doi_cleaned)
+
+            subsetdoi = originalpaperdoi_set[originalpaperdoi_set == doi_cleaned]
             setdoilist = subsetdoi.to_list()
             if len(setdoilist) == 0 or (setdoilist[0] == '' and len(setdoilist) == 1):
                 result_list.append(False)

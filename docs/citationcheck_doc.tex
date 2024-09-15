@@ -1,8 +1,112 @@
-\documentclass{article}
+\documentclass[11pt]{article}
+
+\usepackage{graphicx} 
+\usepackage{geometry}
+\geometry{
+    left=1.5cm,
+    right=1.5cm,
+    top=2cm,
+    bottom=2cm
+}
+\usepackage[english]{babel}
+
+\usepackage{xcolor}
+\definecolor{lightblue}{RGB}{182, 249, 255}
+\definecolor{darkblue}{RGB}{19, 75, 95}
+\definecolor{bluedot}{RGB}{81,171,203}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=darkblue,
+    citecolor=blue,
+    pdftitle={CitationCheck documentation}
+}
+\urlstyle{same}
 
 \begin{document}
+    \begin{center}
+        \includegraphics[scale=0.5]{../logo.png}\vspace{5mm}
 
+        {\Huge \textbf{CitationCheck}}\vspace{2mm}
 
+        {\Large v1.0}\vspace{2mm}
 
+        {\Large \texttt{Documentation}}
+    \end{center}
+    \hrule \vspace{10mm}
+
+    \section{Installation}
+
+        \subsection{Windows}
+    
+        \subsection{Linux}
+
+        \subsection{MacOS}
+
+        Due to the fact that I do not possess a MacBook, I could not test whether the program works correctly, although it should since Python is platform-independent.
+
+    \section{Data}
+
+    The data about retractions is collected from the service \textit{RetractionWatch}. It is retrieved using \textit{Crossref}.
+    Since the application fetches data via the public \textit{Crossref}-API, the amount of requests that the API receives is unpredictable.
+    Therefore, \textit{Crossref} recommends to include an email address in the requests. The requests will be directed to a special pool of servers that are more reliable.
+    Your data is not used for spam and it will not be sold to anyone. For more information, click \href{https://www.crossref.org/documentation/retrieve-metadata/rest-api/tips-for-using-the-crossref-rest-api/}{here}.
+
+    \section{Usage}
+
+        \subsection{Start}
+    
+        Start the executable on your computer. If there is no executable, you can also download the repository (see section \ref{sec:help}) and execute the python script.
+
+        \subsection{BiB or SINGLE}
+
+        When the GUI shows up, you can choose between two options: \textbf{BiB} and \textbf{SINGLE}.
+
+        \begin{itemize}
+            \item \textbf{[BiB]}
+            
+            The \textbf{BiB}-option opens a window where you can choose your \textit{bibtex}-file. The process starts immediately after you have selected a file.
+            
+            \item \textbf{[SINGLE]}
+            
+            The \textbf{SINGLE}-option opens a window where you can enter a title and a DOI. It only performs a search for one reference.
+            The process starts immediately after you have confirmed the input.
+        \end{itemize}
+
+        \subsection{CSV or API}
+
+        The GUI lets you choose between another two options: \textbf{CSV} and \textbf{API}.
+
+        \begin{itemize}
+            \item \textbf{[CSV]}
+            
+            The \textbf{CSV}-option tells the application to use the provided CSV-file. Although the CSV file contains the same information that can be retrieved via the API,
+            it is not held up-to-date. To ensure this, press the \textbf{UPDATE}-button to download the latest version. Depending on your internet connection, it will take some time (e.g. 10 seconds (as of now the file has a size of roughly 46 MB))
+            
+            \item \textbf{[API]}
+            
+            The \textbf{API}-option uses the \textit{Crossref}-API to retrieve data. An internet connection is required for this.
+        \end{itemize}
+
+        \subsection{Results}
+
+        The two fields \textit{passed} and \textit{failed} show how many references have passed the check and how many did not. If you would like to have a more detailed report, 
+        click on the \textbf{PDF}-button and save the pdf. 
+
+    \section{Speed}
+    
+    The time it takes for the application to present a result varies greatly. When you use the API, it depends on the quality of your internet connection and how busy the \textit{Crossref}-API is.
+    When you use the CSV file, it depends on the computing power of your computer.
+    Plus, the average amount of references per paper varies depending on the field and the topic. Nevertheless, to give a you a number, a bibtex-file with $50$ citations roughly needs $47$ seconds (CSV-option).
+    You can assume that $1$ reference takes about $1$ second.
+
+    \section{Help}\label{sec:help}
+
+    The project's homepage can be found on GitHub using this link: \\ \textbf{\url{https://github.com/BenSt099/CitationCheck}}. \vspace{5mm} 
+    
+    \noindent If you want to report a bug, a feature or run into an issue, you can create an \textit{issue} on GitHub: \\ \textbf{\url{https://github.com/BenSt099/CitationCheck/issues}}.
 
 \end{document}

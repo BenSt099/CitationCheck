@@ -1,7 +1,7 @@
 # CitationCheck
 
 <div align="center">
-<img src="app.png" alt="Screenshot of CitationCheck" width="600"/>
+<img src="app.png" alt="Screenshot of CitationCheck" width="700"/>
 </div>
 
 ## Quick Start
@@ -24,8 +24,7 @@ The application uses the following external libraries: `pandas`, `PIL`, `customt
 
 ## Disclaimer
 
-The project's GUI is inspired from the project [FluidFrames.RIFE](https://github.com/Djdefrag/FluidFrames.RIFE). The files `icon_questionmark.png` and
-`logo_github.png` were both taken from **FluidFrames.RIFE**. The file `filetype-pdf.svg` was taken from [here](https://icons.getbootstrap.com/icons/filetype-pdf/).
+The project's GUI is inspired from the project [FluidFrames.RIFE](https://github.com/Djdefrag/FluidFrames.RIFE). The file `logo_github.png` was taken from **FluidFrames.RIFE**. The file `filetype-pdf.svg` was taken from [Bootstrap](https://icons.getbootstrap.com/icons/filetype-pdf/).
 
 ## License 
 

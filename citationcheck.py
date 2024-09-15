@@ -45,8 +45,7 @@ class App(CTk):
             dialog = CTkInputDialog(text="Please type in your email address:", title="Email address", button_fg_color="#bf0041", button_hover_color="#8d0433", button_text_color="black", font=CTkFont(family='times new roman 16 bold', size=17, weight="bold"))
             email = dialog.get_input()
             if email == "" or (search(r"^\S+@\S+\.\S+$", email) is None):
-                email = "citationcheck.github@gmail.com"
-
+                email = "citationcheck.application.github@gmail.com"
             content_dict = {
                 'email': email
             }
