@@ -13,7 +13,7 @@ class SingleCTk(CTkToplevel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.geometry("900x220")
-        self.after(201, lambda: self.iconbitmap('logo.ico')) # fix from StackOverflow
+        self.after(201, lambda: self.iconbitmap('assets/logo.ico')) # fix from StackOverflow
         # https://stackoverflow.com/questions/75825190/how-to-put-iconbitmap-on-a-customtkinter-toplevel
         self.resizable(False, False)
         self.title("CheckCitation - Input")

@@ -1,4 +1,3 @@
-from os import getcwd
 from os.path import exists
 from threading import Thread
 from multiprocessing import Pool
@@ -62,7 +61,7 @@ class UpperFrame(CTkFrame):
         infoFrame.grid_rowconfigure(2, weight=1)
         infoFrame.grid_columnconfigure(0, weight=1)
         
-        image_cc_icon = CTkImage(Image.open("logo.png"), size=(21,21))
+        image_cc_icon = CTkImage(Image.open("assets/logo.png"), size=(21,21))
         self.label_title = CTkButton(infoFrame, fg_color=hovercolor, hover_color=hovercolor, text_color=textcolor, text="CitationCheck", image=image_cc_icon, compound="left", font=CTkFont(family='times new roman 14 bold', size=20, weight="bold"))
         self.label_title.grid(row=0, column=0, padx=10, pady=10)
 
@@ -100,13 +99,13 @@ class UpperFrame(CTkFrame):
         self.radio_down = CTkRadioButton(radioFrame, text="Online [API]", variable=self.radio_var, value=2)
         self.radio_down.grid(row=1, column=0, padx=5, pady=2)
 
-        image_update = CTkImage(Image.open("update.png"), size=(20,20))
+        image_update = CTkImage(Image.open("assets/update.png"), size=(20,20))
         self.btn_text = StringVar()
         self.label_update = CTkButton(settingsFrame, textvariable=self.btn_text, fg_color = "#8a8888", hover_color="#636262", text_color="black", text="UPDATE", image=image_update, compound="right", font=CTkFont(family='times new roman 14 bold', size=17, weight="bold"), command=self.call_update)
         self.label_update.grid(row=0, column=1, padx=10, pady=5)
         self.btn_text.set("UPDATE")
 
-        image_pdf = CTkImage(Image.open("filetype-pdf.png"), size=(20,20))
+        image_pdf = CTkImage(Image.open("assets/filetype-pdf.png"), size=(20,20))
         label_pdf = CTkButton(settingsFrame, fg_color = "#3d89cc", hover_color="#2a70ad", text_color="black", text="PDF", image=image_pdf, compound="right", font=CTkFont(family='times new roman 14 bold', size=17, weight="bold"), command=self.export_to_pdf)
         label_pdf.grid(row=0, column=2, padx=10, pady=5)
         ###########################
@@ -138,7 +137,7 @@ class UpperFrame(CTkFrame):
         if self.update_already_in_progress == 0:
             content_dict = {}
             self.update_already_in_progress = 1
-            with open('cc_email.json') as email_file:
+            with open('assets/cc_email.json') as email_file:
                 content_dict = load(email_file)
             
             self.btn_text.set("Working...")
@@ -154,7 +153,7 @@ class UpperFrame(CTkFrame):
     def download_csv(self, email_address, callback_f):
         api_url = r"https://api.labs.crossref.org/data/retractionwatch?" + email_address
         response = get(api_url)
-        with open(getcwd() + "/CitationCheck_data_CROSSREF_099.csv", 'wb') as f:
+        with open("assets/CitationCheck_data_CROSSREF_099.csv", 'wb') as f:
             f.write(response.content)
         callback_f()
 
@@ -237,7 +236,7 @@ class UpperFrame(CTkFrame):
             k = self.toplevel_window.get_information()
             self.toplevel_window.destroy_window()
             content_dict = {}
-            with open('cc_email.json') as email_file:
+            with open('assets/cc_email.json') as email_file:
                 content_dict = load(email_file)
 
             if self.radio_var.get() == 1: # local [csv]
@@ -255,7 +254,7 @@ class UpperFrame(CTkFrame):
         Thread(target=self.process_single_query_process_csv, args=(data,self.process_single_query_update_ui), daemon=True).start()
 
     def process_single_query_process_csv(self, data, callback_f):
-        dataset = read_csv('CitationCheck_data_CROSSREF_099.csv', dtype={'OriginalPaperDOI': str, 'Reason': str})
+        dataset = read_csv('assets/CitationCheck_data_CROSSREF_099.csv', dtype={'OriginalPaperDOI': str, 'Reason': str})
         result_list = []
         if data[1] == '': # use title
             title_set = dataset['Title']
@@ -333,7 +332,7 @@ def search_in_csv(entry):
         data.append(entry[2])
     else:
         data.append('')
-    dataset = read_csv('CitationCheck_data_CROSSREF_099.csv', dtype={'OriginalPaperDOI': str, 'Reason': str})
+    dataset = read_csv('assets/CitationCheck_data_CROSSREF_099.csv', dtype={'OriginalPaperDOI': str, 'Reason': str})
     result_list = []
     if data[1] == '': # use title
         title_set = dataset['Title']
@@ -371,7 +370,7 @@ def search_api(entry):
         data.append(entry[2])
     else:
         data.append('')
-    with open('cc_email.json') as email_file:
+    with open('assets/cc_email.json') as email_file:
         content_dict = load(email_file)
     
     if data[1] != '':

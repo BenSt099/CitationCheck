@@ -48,11 +48,11 @@ class LowerFrame(CTkFrame):
         label = CTkLabel(upperFrame, text="CitationCheck v1.0", height=10, font=CTkFont(family='times new roman 16 bold', size=16, weight="bold"))
         label.grid(row=0, column=0, padx=0, pady=0, sticky="ew")           
 
-        image_github = CTkImage(Image.open("logo_github.png"), size=(18,18))
+        image_github = CTkImage(Image.open("assets/logo_github.png"), size=(18,18))
         label_github = CTkButton(lowerFrame, fg_color = "transparent", height=10, hover_color=hovercolor, text_color=textcolor, text="Homepage", image=image_github, compound="left", font=CTkFont(family='times new roman 14 bold', size=13, weight="bold"), command=self.openGitHub)
         label_github.grid(row=0, column=0, padx=0, pady=0, sticky="ew")
 
-        image_issue = CTkImage(Image.open("issue.png"), size=(18,18))
+        image_issue = CTkImage(Image.open("assets/issue.png"), size=(18,18))
         label_issue = CTkButton(lowerFrame, fg_color = "transparent", height=10, hover_color=hovercolor, text_color=textcolor, text="Issues", image=image_issue, compound="left", font=CTkFont(family='times new roman 14 bold', size=13, weight="bold"), command=self.openGitHubIssue)
         label_issue.grid(row=0, column=1, padx=0, pady=0, sticky="ew")
 

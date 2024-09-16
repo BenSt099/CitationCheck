@@ -5,6 +5,8 @@
 ###############################################################################################
 ###############################################################################################
 
+from platform import system
+from multiprocessing import freeze_support
 import cc_upperframe
 import cc_lowerframe
 from customtkinter import CTkInputDialog
@@ -26,7 +28,7 @@ class App(CTk):
         set_default_color_theme("dark-blue")
         self.geometry("800x600")
         self.title("CheckCitation")
-        self.iconbitmap('logo.ico')
+        self.iconbitmap('assets/logo.ico')
         self.grid_rowconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=1)
         self.grid_rowconfigure(2, weight=1)
@@ -39,7 +41,7 @@ class App(CTk):
         self.lowerframe.grid(row=4, column=0, padx=0, pady=0, sticky="new")
 
         content_dict = {}
-        with open('cc_email.json') as email_file:
+        with open('assets/cc_email.json') as email_file:
             content_dict = load(email_file)
         if content_dict == {}:
             dialog = CTkInputDialog(text="Please type in your email address:", title="Email address", button_fg_color="#bf0041", button_hover_color="#8d0433", button_text_color="black", font=CTkFont(family='times new roman 16 bold', size=17, weight="bold"))
@@ -49,10 +51,12 @@ class App(CTk):
             content_dict = {
                 'email': email
             }
-            with open("cc_email.json", mode="w", encoding="utf-8") as email_file:
+            with open("assets/cc_email.json", mode="w", encoding="utf-8") as email_file:
                 dump(content_dict, email_file)    
-    
+
 if __name__ == "__main__":
+    if system() == 'Windows':
+        freeze_support()
     app = App()
     app.mainloop()
 

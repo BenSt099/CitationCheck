@@ -6,7 +6,7 @@ from datetime import datetime
 
 class PDF_REPORT(FPDF):
     def header(self):
-        self.image('logo.png', 76, 11, 8, link='https://github.com/BenSt099/CitationCheck')
+        self.image('assets/logo.png', 76, 11, 8, link='https://github.com/BenSt099/CitationCheck')
         self.set_font('Times', 'B', 15)
         self.cell(80)
         self.cell(30, 10, 'CitationCheck', 0, 0, 'C')
