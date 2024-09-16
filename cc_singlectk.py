@@ -3,6 +3,8 @@ from customtkinter import CTkButton
 from customtkinter import CTkEntry
 from customtkinter import CTkToplevel
 from customtkinter import get_appearance_mode
+from platform import system
+from tkinter import PhotoImage
 
 ###############################################################################################
 #####################################      SINGLECTK      #####################################
@@ -13,8 +15,14 @@ class SingleCTk(CTkToplevel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.geometry("900x220")
-        self.after(201, lambda: self.iconbitmap('assets/logo.ico')) # fix from StackOverflow
-        # https://stackoverflow.com/questions/75825190/how-to-put-iconbitmap-on-a-customtkinter-toplevel
+
+        if system() == 'Windows':
+            self.after(201, lambda: self.iconbitmap('assets/logo.ico')) # fix from StackOverflow
+            # https://stackoverflow.com/questions/75825190/how-to-put-iconbitmap-on-a-customtkinter-toplevel
+        else:
+            icon_cc = PhotoImage(file='assets/logo.png')
+            self.iconphoto(False, icon_cc)
+
         self.resizable(False, False)
         self.title("CheckCitation - Input")
         self.grid_rowconfigure(3) 

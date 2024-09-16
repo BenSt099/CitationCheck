@@ -9,6 +9,7 @@ from platform import system
 from multiprocessing import freeze_support
 import cc_upperframe
 import cc_lowerframe
+from tkinter import PhotoImage
 from customtkinter import CTkInputDialog
 from customtkinter import CTkFont
 from customtkinter import CTk
@@ -28,7 +29,13 @@ class App(CTk):
         set_default_color_theme("dark-blue")
         self.geometry("800x600")
         self.title("CheckCitation")
-        self.iconbitmap('assets/logo.ico')
+        
+        if system() == 'Windows':
+            self.iconbitmap('assets/logo.ico')
+        else:
+            icon_cc = PhotoImage(file='assets/logo.png')
+            self.iconphoto(False, icon_cc)
+
         self.grid_rowconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=1)
         self.grid_rowconfigure(2, weight=1)
