@@ -6,7 +6,7 @@
 
 ## Quick Start
 
-1. Download **CitationCheck** from [here](https://github.com/BenSt099/CitationCheck/blob/main/).
+1. Download **CitationCheck** from [here](https://github.com/BenSt099/CitationCheck/releases).
 
 2. Open the application.
 
@@ -14,13 +14,19 @@
 
 4. Export a detailed report via the `PDF`-button.
 
+## Installation
+
+- Windows: all libs are included; simply execute the `.exe` file
+
+- Other: install the dependencies (see section Dependencies), run `citationcheck.py`
+
 ## Documentation
 
 The documentation is available [here](https://github.com/BenSt099/CitationCheck/blob/main/docs/citationcheck_doc.pdf).
 
 ## Dependencies
 
-The application uses the following external libraries: `pandas`, `PIL`, `customtkinter`, `tkinter`.
+The application uses the following external libraries: `pandas`, `PIL`, `customtkinter`, `tkinter`, `fpdf`.
 
 ## Disclaimer
 
