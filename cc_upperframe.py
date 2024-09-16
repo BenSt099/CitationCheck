@@ -266,14 +266,14 @@ class UpperFrame(CTkFrame):
                 result_list.append(False)
             subsettitle = title_set[title_set == best_match_title[0]]
             result_list.append(True)
-            result_list.append(data[0])
             result_list.append(best_match_title[0])
+            result_list.append('')
             result_list.append(reason_set[subsettitle.index.item()])
         else: # otherwise, use always doi
             originalpaperdoi_set = dataset['OriginalPaperDOI'].astype(str)
             reason_set = dataset['Reason'].astype(str)
             doi_cleaned = data[1]
-            
+
             if "https://doi.org/" in doi_cleaned:
                 doi_cleaned = sub("https://doi.org/", "", doi_cleaned)
 
