@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="logo.ico" type="image/vnd.microsoft.icon">
+    <link rel="stylesheet" href="bootstrap-5.3.3-dist/css/bootstrap.min.css">
+    <title>CitationCheck</title>
+</head>
+<script src="bootstrap-5.3.3-dist/js/bootstrap.min.js"></script>
+<script>
+    function changeColor() {
+        const textfield = document.querySelectorAll('.textColorControl');
+        const divField = document.querySelectorAll('.backgroundColorControl');
+        const buttonsHelp = document.querySelectorAll('.buttonHelp');
+        textfield.forEach(element => {
+            if (getComputedStyle(element).color == 'rgb(255, 255, 255)') {
+                element.setAttribute('style', 'color: rgb(37, 37, 37)');
+                document.getElementById('b').style.backgroundColor = 'rgb(255, 255, 255)';
+                document.getElementById('buttonChangeColor').style.backgroundColor = 'rgb(219, 219, 219)';
+            } else {
+                element.setAttribute('style', 'color: rgb(255, 255, 255)');
+                document.getElementById('b').style.backgroundColor = 'rgb(0,0,0)';
+                document.getElementById('buttonChangeColor').style.backgroundColor = 'rgb(37, 37, 37)';
+            }
+        });
+        divField.forEach(element => {
+            if (getComputedStyle(element).backgroundColor == 'rgb(37, 37, 37)') {
+                element.setAttribute('style', 'background-color: rgb(219, 219, 219)');
+            } else {
+                element.setAttribute('style', 'background-color: rgb(37, 37, 37)');
+            }
+        });
+        buttonsHelp.forEach(element => {
+            if (getComputedStyle(element).backgroundColor == 'rgb(37, 37, 37)') {
+                element.setAttribute('style', 'background-color: rgb(219, 219, 219)');
+            } else {
+                element.setAttribute('style', 'background-color: rgb(37, 37, 37)');
+            }
+        });
+    }
+</script>
+<style>
+    #b {
+        background-color: black;
+    }
+
+    #buttonChangeColor {
+        background-color: rgb(37, 37, 37);
+    }
+
+    .outerContainer {
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+        width: 80%;
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    .buttonSubmit {
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        color: black;
+        font-size: large;
+        font-weight: bold;
+        padding: 10px 100px;
+        background-color: rgb(191, 0, 65);
+    }
+
+    .buttonHelp {
+        border-radius: 3px;
+        border: none;
+        cursor: pointer;
+        color: rgb(255, 255, 255);
+        font-size: medium;
+        padding: 6px 120px;
+        background-color: rgb(37, 37, 37);
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .buttonHelp:hover {
+        background-color: rgb(0, 0, 0);
+    }
+
+    .textColorControl {
+        color: white;
+    }
+
+    .backgroundColorControl {
+        background-color: rgb(37, 37, 37);
+    }
+
+    .changeColor {
+        border-radius: 3px;
+        border: none;
+        cursor: pointer;
+        color: rgb(255, 255, 255);
+        font-size: large;
+        padding: 6px 10px;
+        background-color: rgb(37, 37, 37);
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+</style>
+
+<body id="b">
+
+    <div style="margin-top: 5%;">
+
+
+        <div class="outerContainer backgroundColorControl">
+            <h1 class="textColorControl"><img src="logo.ico" height="32" width="32"> CitationCheck</h1>
+
+            <button id="buttonChangeColor" class="changeColor" type="submit" onclick="changeColor()">
+                <img src="clear_day_24dp_E8EAED_FILL0_wght400_GRAD0_opsz24.svg">
+            </button>
+
+        </div>
+
+
+        <div class="outerContainer backgroundColorControl">
+            <h2>BibTeX</h2>
+
+
+            <input type="file" value="File" class="buttonSubmit" style="margin-right: 10px;" accept=".bib"><br>
+            <input type="button" value="Check" class="buttonSubmit" style="margin-left: 10px;">
+        </div>
+
+        <div class="outerContainer backgroundColorControl" style="text-align: center;">
+            <h2>Single</h2>
+
+            <div style="width: 50%;margin-left: auto;margin-right: auto;">
+                <div style="text-align: left;">
+                    <div class="row mb-3">
+                        <label for="inputEmail3" class="col-sm-2 col-form-label textColorControl">Title</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="inputEmail3">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="inputEmail3" class="col-sm-2 col-form-label textColorControl">DOI</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="inputEmail3">
+                        </div>
+                    </div>
+                    <fieldset class="row mb-3">
+                        <legend class="col-form-label col-sm-2 pt-0 textColorControl">Source</legend>
+                        <div class="col-sm-10">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios1"
+                                    value="option1" checked>
+                                <label class="form-check-label textColorControl" for="gridRadios1">
+                                    CSV [Local]
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios2"
+                                    value="option2">
+                                <label class="form-check-label textColorControl" for="gridRadios2">
+                                    API [Online]
+                                </label>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <!--<button type="submit" class="btn btn-primary">Sign in</button>-->
+                </div>
+                <input type="submit" value="Check" class="buttonSubmit" style="margin-left: 10px;">
+            </div>
+        </div>
+
+        <div class="outerContainer backgroundColorControl" style="background-color: rgb(37, 37, 37);">
+            <h4 class="textColorControl">CitationCheck v1.0</h4>
+            <!--<input type="button" value="Homepage" src="logo_github.png" class="buttonHelp" style="margin-right: 10px;">-->
+
+            <button class="buttonHelp" type="submit">
+                <img src="home_24dp_E8EAED_FILL0_wght400_GRAD0_opsz24.svg">
+                <span class="textColorControl">Homepage</span>
+            </button>
+
+            <button class="buttonHelp" type="submit">
+                <img src="bug_report_24dp_E8EAED_FILL0_wght400_GRAD0_opsz24.svg">
+                <span class="textColorControl">Issues</span>
+            </button>
+
+
+            <!--<input type="button" value="Issues" class="buttonHelp" style="margin-left: 10px;">-->
+        </div>
+
+    </div>
+</body>
+
+</html>
