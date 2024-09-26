@@ -19,5 +19,5 @@ class Api:
 
 if __name__ == '__main__':
     api = Api()
-    webview.create_window('CitationCheck', './gui/app.html', js_api=api, text_select=True, maximized=True)
+    webview.create_window('CitationCheck', './gui/main.html', js_api=api, text_select=True, maximized=True)
     webview.start()
